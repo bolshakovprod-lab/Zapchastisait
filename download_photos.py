@@ -12,14 +12,28 @@ THREADS = 8
 RETRIES = 3
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36"
 
-d = json.load(open("data/parts.json", encoding="utf-8"))
-base = d["photoBase"]
+# Адрес фотоархива поставщика лежит в supplier.py — этот файл в репозиторий не попадает.
+try:
+    from supplier import PHOTO_BASE
+except ImportError:
+    sys.exit("Нет файла supplier.py с адресом фотоархива поставщика — см. README")
 
+src_by_art = {}
+with open("articles.csv", encoding="utf-8") as f:
+    next(f)
+    for line in f:
+        art, invnn = line.split(";", 2)[:2]
+        src_by_art[art] = invnn
+
+d = json.load(open("data/parts.json", encoding="utf-8"))
 jobs = []
 for it in d["items"]:
+    invnn = src_by_art.get(it["a"])
+    if not invnn:
+        continue
     for n in range(1, it["f"] + 1):
-        name = f'{str(it["i"]).zfill(8)}_{n}.jpg'
-        jobs.append((base[it["g"]] + name, os.path.join(OUT, name)))
+        name = f"{invnn.zfill(8)}_{n}.jpg"
+        jobs.append((PHOTO_BASE + name, os.path.join(OUT, name)))
 
 os.makedirs(OUT, exist_ok=True)
 todo = [(u, p) for u, p in jobs if not os.path.exists(p) or os.path.getsize(p) == 0]

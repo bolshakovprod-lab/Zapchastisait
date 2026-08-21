@@ -3,3 +3,4 @@ prices/
 .DS_Store
 photos/orig/
 articles.csv
+supplier.py
