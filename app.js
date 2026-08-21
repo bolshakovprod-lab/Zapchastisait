@@ -268,7 +268,7 @@ function openPart(i, g) {
         <div class="m-guarantee">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">${ICONS.shield}</svg>
           <div>${esc((window.BENEFITS && window.BENEFITS[0] && window.BENEFITS[0].title) || '')} ·
-          доставка на ваше СТО · оплата при получении</div>
+          бесплатная доставка до ТК</div>
         </div>
         <p class="m-note">Отправим фото и видео агрегата до оплаты, поможем с подбором по VIN.</p>
       </div>
