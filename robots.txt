@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /data/
+Disallow: /photos/orig/
+
+Sitemap: https://bolshakovprod-lab.github.io/Zapchastisait/sitemap.xml

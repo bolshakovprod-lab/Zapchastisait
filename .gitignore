@@ -1,5 +1,5 @@
 venv/
 prices/
 .DS_Store
-photos/
+photos/orig/
 articles.csv

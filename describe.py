@@ -53,6 +53,11 @@ def article(invnn):
     return ART_PREFIX + str(int(invnn) * 7 + 13)
 
 
+def file_stem(article_no):
+    """ДК-586326 -> dk586326: имя файла с фото."""
+    return "dk" + article_no.replace(ART_PREFIX, "").replace("-", "")
+
+
 def _expand(chunk):
     """«б/генер./гур/конд.» -> «без генератора, ГУР, кондиционера»"""
     if chunk.startswith("б/"):

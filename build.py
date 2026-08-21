@@ -3,11 +3,10 @@
 Запуск:  ./venv/bin/python build.py
 """
 import xlrd, json, os, re, sys
-from describe import describe, article, brand_ru
+from describe import describe, article, brand_ru, file_stem
 
 PRICES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prices")
-PHOTO_BASE = {"body": "https://avtodik.ru/picture/images_body/",
-              "engine": "https://avtodik.ru/picture/images_engine/"}
+PHOTO_BASE = {"big": "photos/big/", "thumb": "photos/thumb/"}
 
 # Какие разделы прайса публикуем. Сейчас только моторный.
 # Чтобы вернуть кузов и салон -> ONLY_GROUPS = {"engine", "body"}
@@ -64,6 +63,8 @@ def detect_group(sh, photo_col):
     return "body"
 
 MARKUP = float(os.environ.get("MARKUP", "1.33"))   # наценка: 1.33 = +33%
+MIN_MARGIN = 14000                                 # но не меньше этой суммы с позиции, ₽
+MIN_BUY = 5000                                     # дешевле этого закупа не публикуем вовсе
 ROUND_TO = 500                                     # округление цены вверх, ₽
 
 def s(v):
@@ -73,12 +74,15 @@ def s(v):
     v = str(v).strip()
     return "" if v in ("-", "<>", "нет", "0", "0.0") else v
 
+MAX_PHOTOS = 5   # столько снимков публикуем; см. process_photos.py
+
+
 def photos(cell, group, invnn):
     urls = [u.strip() for u in str(cell).split(";") if u.strip()]
     if not urls:
         return 0
-    # все ссылки вида <base>00219455_N.jpg -> хватит хранить количество
-    return len(urls)
+    # ссылки вида <base>00219455_N.jpg — хватит хранить количество
+    return min(len(urls), MAX_PHOTOS)
 
 def mileage(*texts):
     """Пробег в тысячах км из описания, если он там есть."""
@@ -113,7 +117,7 @@ def search_words(name, *texts):
                 words.append(extra)
     return " ".join(w for w in words if w)
 
-items, cats, brands = [], {}, {}
+items, cats, brands, sources = [], {}, {}, []
 files = sorted(f for f in os.listdir(PRICES_DIR) if f.lower().endswith((".xls", ".xlsx")))
 if not files:
     sys.exit("Положите прайсы поставщика (.xls) в папку prices/ и запустите снова.")
@@ -130,7 +134,10 @@ for fname in files:
         invnn = g("invnn")
         if not invnn:
             continue
-        price = float(sh.cell_value(r, hdr["price_min"]) or 0) * MARKUP
+        buy = float(sh.cell_value(r, hdr["price_min"]) or 0)
+        if buy and buy < MIN_BUY:
+            continue                               # возиться с такой позицией смысла нет
+        price = max(buy * MARKUP, buy + MIN_MARGIN) if buy else 0
         # округляем вверх до ROUND_TO, чтобы в каталоге не было цен вида 86 450 ₽
         price = int(-(-price // ROUND_TO) * ROUND_TO) if price else 0
         name = g("name").strip().lower()
@@ -142,10 +149,10 @@ for fname in files:
         kind = gearbox_kind(name, g("remark"), g("comment"), g("modelN"), g("oem_code"))
         title, text, note = describe(name, kind, marka, g("model"), g("kuzovN"),
                                      g("engineN"), g("modelN"), km, g("ayear"), g("remark"))
+        art = article(invnn)
         it = {
-            "a": article(invnn),              # наш артикул
-            "i": invnn,                       # склад поставщика; уйдёт, когда фото переедут к нам
-            "g": group,                       # body | engine
+            "a": art,                         # наш артикул
+            "ph": file_stem(art),             # имя файлов с фото
             "n": name,                        # категория/наименование
             "b": marka,                       # марка
             "m": g("model"),                  # модель
@@ -171,10 +178,16 @@ for fname in files:
         if side:
             it["s"] = side
         items.append(it)
+        sources.append((invnn, int(buy)))
         if name:
             cats[name] = cats.get(name, 0) + 1
         if marka:
             brands[marka] = brands.get(marka, 0) + 1
+
+with open("articles.csv", "w", encoding="utf-8") as f:
+    f.write("наш артикул;артикул поставщика;закуп;цена на сайте;маржа;описание\n")
+    for it, (invnn, buy) in zip(items, sources):
+        f.write(f'{it["a"]};{invnn};{buy};{it["p"]};{it["p"] - buy};{it["t"]}\n')
 
 items.sort(key=lambda x: (x["n"], x["b"], x["m"]))
 out = {
@@ -188,10 +201,5 @@ out = {
 os.makedirs("data", exist_ok=True)
 with open("data/parts.json", "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
-with open("articles.csv", "w", encoding="utf-8") as f:
-    f.write("наш артикул;артикул поставщика;описание\n")
-    for it in items:
-        f.write(f'{it["a"]};{it["i"]};{it["t"]}\n')
-
 print("позиций:", len(items), "| марок:", len(brands), "| категорий:", len(cats))
 print("размер:", round(os.path.getsize("data/parts.json") / 1048576, 2), "МБ")

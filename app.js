@@ -16,8 +16,7 @@ const plural = (n, one, few, many) => {
   const a = Math.abs(n) % 100, b = a % 10;
   return a > 10 && a < 20 ? many : b > 1 && b < 5 ? few : b === 1 ? one : many;
 };
-const pad = i => String(i).padStart(8, '0');
-const photoUrl = (it, n) => DB.photoBase[it.g] + pad(it.i) + '_' + n + '.jpg';
+const photoUrl = (it, n, size = 'big') => DB.photoBase[size] + it.ph + '_' + n + '.jpg';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
 const catLabel = n => (DB.catLabels && DB.catLabels[n]) || cap(n);
@@ -26,7 +25,7 @@ const alnum = s => s.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
 
 // ─── контакты ───
 function contacts() {
-  document.title = S.city ? `${S.name} — ${S.city}` : S.name;
+  // заголовок задан в HTML и важен для поисковиков — не трогаем
   $('#headPhone').textContent = S.phone || '';
   $('#headPhone').href = 'tel:' + (S.phoneTel || '');
   $('.logo-text').textContent = S.name || 'Запчасти';
@@ -163,6 +162,7 @@ async function load() {
   });
   heroStats();
   fill(els.brand, DB.brands);
+  brandLinks();
   fill(els.cat, DB.cats.map(([n, c]) => [catLabel(n), c]), DB.cats.map(([n]) => n));
   readUrl();
   apply();
@@ -175,6 +175,18 @@ function fill(sel, pairs, values) {
     o.textContent = `${label} (${count})`;
     return o;
   }));
+}
+
+// ссылки на страницы марок — путь робота вглубь каталога
+function brandLinks() {
+  const box = $('#brandLinks');
+  if (!box) return;
+  const slug = b => b.toLowerCase().replace(/[\/ ]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '').replace(/-{2,}/g, '-').replace(/^-|-$/g, '');
+  box.innerHTML = 'Популярные марки: ' + DB.brands
+    .filter(([, c]) => c >= 3)
+    .map(([b]) => `<a href="m/${slug(b)}.html">${esc(b.charAt(0) + b.slice(1).toLowerCase())}</a>`)
+    .join(' · ');
 }
 
 // ─── фильтрация ───
@@ -226,7 +238,7 @@ function render() {
   const html = part.map(it => `
     <article class="card" data-i="${it.i}" data-g="${it.g}">
       <div class="thumb">${tags(it)}${it.f
-        ? `<img loading="lazy" src="${photoUrl(it, 1)}" alt="${esc(it.n)} ${esc(carLine(it))}"
+        ? `<img loading="lazy" src="${photoUrl(it, 1, 'thumb')}" alt="${esc(it.n)} ${esc(carLine(it))}"
              onerror="this.parentNode.innerHTML='<span class=nophoto>без фото</span>'">`
         : '<span class="nophoto">без фото</span>'}</div>
       <div class="card-b">
@@ -245,6 +257,7 @@ function openPart(i, g) {
   const it = DB.items.find(x => x.i === i && x.g === g);
   if (!it) return;
   const shots = Array.from({ length: it.f }, (_, k) => photoUrl(it, k + 1));
+  const minis = Array.from({ length: it.f }, (_, k) => photoUrl(it, k + 1, 'thumb'));
   const row = (k, v) => v ? `<tr><td>${k}</td><td>${esc(v)}</td></tr>` : '';
   const msg = encodeURIComponent(
     `Здравствуйте! Интересует ${it.ti || it.n}, артикул ${it.a}, ${money(it.p)}. В наличии?`);
@@ -254,8 +267,8 @@ function openPart(i, g) {
       <div>
         ${shots.length
           ? `<img class="gal-main" id="galMain" src="${shots[0]}" alt="${esc(it.n)}">
-             <div class="gal-strip">${shots.map((u, k) =>
-               `<img src="${u}" class="${k ? '' : 'on'}" data-u="${u}" alt=""
+             <div class="gal-strip">${minis.map((u, k) =>
+               `<img src="${u}" class="${k ? '' : 'on'}" data-u="${shots[k]}" alt=""
                   onerror="this.remove()">`).join('')}</div>`
           : `<div class="gal-main" style="display:grid;place-items:center;color:var(--muted)">Фото нет</div>`}
       </div>
