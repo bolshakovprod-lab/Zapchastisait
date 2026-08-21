@@ -43,6 +43,21 @@ function contacts() {
     `<a href="tel:${esc(S.phoneTel)}">${esc(S.phone)}</a>`;
   $('#footHours').textContent =
     [S.hours, S.updated ? 'каталог обновлён ' + S.updated : ''].filter(Boolean).join(' · ');
+
+  // реквизиты продавца — требование закона о защите прав потребителей
+  const L = window.LEGAL || {};
+  $('#footLegal').textContent = [L.entity, L.inn && 'ИНН ' + L.inn,
+    L.ogrn && 'ОГРН ' + L.ogrn, L.address].filter(Boolean).join(' · ');
+
+  // уведомление о cookie — показываем один раз
+  const box = $('#cookie');
+  if (box && !localStorage.getItem('cookieOk')) {
+    box.classList.add('show');
+    $('#cookieOk').onclick = () => {
+      localStorage.setItem('cookieOk', '1');
+      box.classList.remove('show');
+    };
+  }
 }
 
 // ─── карусель преимуществ ───
