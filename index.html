@@ -4,16 +4,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Двигатели и КПП в наличии — контрактные и б/у</title>
-<meta name="description" content="Контрактные двигатели, АКПП, МКПП, вариаторы и раздаточные коробки в наличии. Поиск по марке, модели и номеру агрегата.">
+<meta name="description" content="Контрактные двигатели, АКПП, МКПП, вариаторы и раздаточные коробки в наличии. Гарантия, доставка на СТО, подбор по VIN.">
+<meta name="theme-color" content="#14171f">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="top">
   <div class="wrap top-in">
-    <a class="logo" href="./"><span class="logo-mark">ДК</span> Двигатели и КПП</a>
-    <a class="phone" id="headPhone" href="#">&nbsp;</a>
+    <a class="logo" href="./"><span class="logo-mark">ДК</span><span class="logo-text">Двигатели и КПП</span></a>
+    <div class="top-contacts">
+      <a class="phone" id="headPhone" href="#">&nbsp;</a>
+      <a class="btn-wa" id="headWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
   </div>
 </header>
+
+<section class="hero">
+  <div class="wrap hero-in">
+    <h1 id="heroTitle">Контрактные двигатели и коробки в наличии</h1>
+    <p class="hero-sub" id="heroSub">Проверенные агрегаты из Японии, Кореи и Европы</p>
+    <div class="hero-stats" id="heroStats"></div>
+  </div>
+</section>
+
+<section class="bene" aria-label="Наши условия">
+  <div class="wrap bene-in">
+    <div class="bene-track" id="beneTrack"></div>
+    <div class="bene-dots" id="beneDots"></div>
+  </div>
+</section>
 
 <div class="searchbar">
   <div class="wrap">
@@ -30,7 +49,9 @@
         <option value="rel">Сортировка: по умолчанию</option>
         <option value="asc">Сначала дешёвые</option>
         <option value="desc">Сначала дорогие</option>
+        <option value="km">Сначала с меньшим пробегом</option>
       </select>
+      <label class="chk"><input id="fKm" type="checkbox"> Пробег до 100 000 км</label>
       <label class="chk"><input id="fPhoto" type="checkbox"> Только с фото</label>
       <button id="reset" class="btn-ghost" type="button">Сбросить</button>
     </div>
@@ -44,12 +65,32 @@
   <button id="more" class="btn-more" hidden type="button">Показать ещё</button>
 </main>
 
-<footer class="foot">
+<section class="how">
   <div class="wrap">
-    <p id="footContacts"></p>
-    <p class="muted">Наличие и цены актуальны на дату последнего обновления каталога. Уточняйте перед покупкой.</p>
+    <h2>Как проходит покупка</h2>
+    <ol class="how-steps">
+      <li><b>Находите агрегат</b><span>Или присылаете VIN — подберём сами и бесплатно.</span></li>
+      <li><b>Показываем и бронируем</b><span>Фото, видео работы, ответы по состоянию. Резервируем за вами.</span></li>
+      <li><b>Везём на ваше СТО</b><span>Доставка в сервис, где будете ставить. Оплата — при получении.</span></li>
+      <li><b>Проверяете и ставите</b><span>Гарантия действует с момента установки.</span></li>
+    </ol>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <div>
+      <p id="footContacts"></p>
+      <p class="muted" id="footHours"></p>
+    </div>
+    <p class="muted">Наличие и цены актуальны на дату обновления каталога. Уточняйте перед покупкой — агрегаты уходят быстро.</p>
   </div>
 </footer>
+
+<a class="fab" id="fabWa" href="#" target="_blank" rel="noopener" aria-label="Написать в WhatsApp">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9 0-1.4.7-2 1-2.3.2-.3.6-.4.8-.4h.6c.2 0 .4 0 .7.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.2.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.6 0 1Z"/></svg>
+  <span>Написать</span>
+</a>
 
 <div id="modal" class="modal" hidden>
   <div class="modal-bg" data-close></div>

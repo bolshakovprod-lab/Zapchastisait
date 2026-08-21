@@ -44,8 +44,11 @@ CAT_SYNONYMS = {
 
 # Тип коробки распознаём по описанию, а не вешаем на всю категорию:
 # иначе запрос "вариатор" выдаёт все автоматы подряд.
+KM_RX = re.compile(r"(\d{1,3})\s*т\.?\s*км", re.I)      # в прайсе пишут "111ткм"
+
 GEARBOX_KINDS = [
-    (re.compile(r"\bcvt\b|вариатор", re.I), "вариатор cvt"),
+    (re.compile(r"cvt|вариатор|\bre0f|\bjf0|k310|multitronic|xtronic|lineartronic", re.I),
+     "вариатор cvt"),
     (re.compile(r"dsg|\bdct\b|робот", re.I), "робот dsg"),   # в прайсе пишут "6DSG", "7DSG"
 ]
 
@@ -75,13 +78,37 @@ def photos(cell, group, invnn):
     # все ссылки вида <base>00219455_N.jpg -> хватит хранить количество
     return len(urls)
 
+def mileage(*texts):
+    """Пробег в тысячах км из описания, если он там есть."""
+    m = KM_RX.search(" ".join(texts))
+    if not m:
+        return 0
+    km = int(m.group(1))
+    return km if 1 <= km <= 999 else 0
+
+
+def gearbox_kind(name, *texts):
+    """Короткая метка для карточки: Вариатор, Робот DSG, Автомат, Механика."""
+    blob = " ".join(texts)
+    if name in ("акпп",):
+        if GEARBOX_KINDS[0][0].search(blob):
+            return "Вариатор"
+        if GEARBOX_KINDS[1][0].search(blob):
+            return "Робот DSG"
+        return "Автомат"
+    if name == "мкпп":
+        return "Механика"
+    return ""
+
+
 def search_words(name, *texts):
     """Слова-синонимы, по которым позиция должна находиться."""
     words = [CAT_SYNONYMS.get(name, "")]
-    blob = " ".join(texts)
-    for rx, extra in GEARBOX_KINDS:
-        if rx.search(blob):
-            words.append(extra)
+    if name in ("акпп", "мкпп"):
+        blob = " ".join(texts)
+        for rx, extra in GEARBOX_KINDS:
+            if rx.search(blob):
+                words.append(extra)
     return " ".join(w for w in words if w)
 
 items, cats, brands = [], {}, {}
@@ -123,7 +150,9 @@ for fname in files:
             "t": g("remark") or g("comment"), # описание
             "c": g("condition") or "Б/у",
             "f": photos(sh.cell_value(r, hdr["photo"]), group, invnn),
-            "x": search_words(name, g("remark"), g("comment"), g("modelN")),
+            "x": search_words(name, g("remark"), g("comment"), g("modelN"), g("oem_code")),
+            "km": mileage(g("remark"), g("comment")),   # пробег, тыс. км (0 = не указан)
+            "kind": gearbox_kind(name, g("remark"), g("comment"), g("modelN"), g("oem_code")),
         }
         # сторона (перед/зад, лево/право, верх/низ)
         side = " ".join(x for x in (g("F_R"), g("R_L"), g("U_D")) if x)
