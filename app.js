@@ -20,6 +20,7 @@ const pad = i => String(i).padStart(8, '0');
 const photoUrl = (it, n) => DB.photoBase[it.g] + pad(it.i) + '_' + n + '.jpg';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
+const catLabel = n => (DB.catLabels && DB.catLabels[n]) || cap(n);
 const carLine = it => [it.b, it.m, it.k, it.e].filter(Boolean).join(' ');
 const alnum = s => s.toLowerCase().replace(/[^a-zа-я0-9]/gi, '');
 
@@ -46,11 +47,11 @@ async function load() {
     return;
   }
   DB.items.forEach(it => {
-    it._h = [it.n, it.b, it.m, it.k, it.e, it.d, it.o, it.t, it.y].join(' ').toLowerCase();
+    it._h = [it.n, it.x, it.b, it.m, it.k, it.e, it.d, it.o, it.t, it.y].join(' ').toLowerCase();
     it._a = alnum(it.d + ' ' + it.o);
   });
   fill(els.brand, DB.brands);
-  fill(els.cat, DB.cats.map(([n, c]) => [cap(n), c]), DB.cats.map(([n]) => n));
+  fill(els.cat, DB.cats.map(([n, c]) => [catLabel(n), c]), DB.cats.map(([n]) => n));
   readUrl();
   apply();
 }
@@ -143,7 +144,7 @@ function openPart(i, g) {
           ${row('Марка', it.b)}${row('Модель', it.m)}${row('Кузов', it.k)}
           ${row('Двигатель', it.e)}${row('Год', it.y)}${row('Расположение', it.s)}
           ${row('Номер детали', it.d)}${row('OEM-номера', it.o)}
-          ${row('Категория', cap(it.n))}
+          ${row('Категория', catLabel(it.n))}
         </table>
         <div class="cta">
           <a class="call" href="tel:${esc(S.phoneTel)}">Позвонить</a>
