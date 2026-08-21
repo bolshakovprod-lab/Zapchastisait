@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Двигатели и КПП в наличии — контрактные и б/у</title>
+<meta name="description" content="Контрактные двигатели, АКПП, МКПП и навесное в наличии. Поиск по марке, модели, двигателю и OEM-номеру.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href="./"><span class="logo-mark">ДК</span> Двигатели и КПП</a>
+    <a class="phone" id="headPhone" href="#">&nbsp;</a>
+  </div>
+</header>
+
+<div class="searchbar">
+  <div class="wrap">
+    <div class="search-row">
+      <input id="q" type="search" placeholder="Марка, модель, двигатель или номер — например: mazda 3 lf-ve или 8K0919051P" autocomplete="off">
+      <button id="filtersBtn" class="btn-ghost" type="button">Фильтры</button>
+    </div>
+    <div id="filters" class="filters">
+      <select id="fBrand"><option value="">Все марки</option></select>
+      <select id="fCat"><option value="">Все категории</option></select>
+      <input id="fMin" type="number" inputmode="numeric" placeholder="Цена от, ₽">
+      <input id="fMax" type="number" inputmode="numeric" placeholder="до, ₽">
+      <select id="fSort">
+        <option value="rel">Сортировка: по умолчанию</option>
+        <option value="asc">Сначала дешёвые</option>
+        <option value="desc">Сначала дорогие</option>
+      </select>
+      <label class="chk"><input id="fPhoto" type="checkbox"> Только с фото</label>
+      <button id="reset" class="btn-ghost" type="button">Сбросить</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div id="status" class="status">Загружаем каталог…</div>
+  <div id="grid" class="grid"></div>
+  <div id="sentinel"></div>
+  <button id="more" class="btn-more" hidden type="button">Показать ещё</button>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p id="footContacts"></p>
+    <p class="muted">Наличие и цены актуальны на дату последнего обновления каталога. Уточняйте перед покупкой.</p>
+  </div>
+</footer>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <button class="modal-x" data-close aria-label="Закрыть">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
