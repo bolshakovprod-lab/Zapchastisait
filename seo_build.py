@@ -9,7 +9,7 @@ from seo_lib import (CAT_SEO, translit, brand_slug, part_url, cat_url, brand_url
                      money, car_line, part_title, part_description,
                      cat_title, cat_description)
 
-SITE = os.environ.get("SITE_URL", "https://bolshakovprod-lab.github.io/Zapchastisait")
+SITE = os.environ.get("SITE_URL", "https://dvigatel-ekb.ru")
 PER_PAGE = 48
 MIN_FOR_PAGE = 3          # не плодим пустые страницы
 

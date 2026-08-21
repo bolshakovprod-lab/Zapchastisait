@@ -3,4 +3,4 @@ Allow: /
 Disallow: /data/
 Disallow: /photos/orig/
 
-Sitemap: https://bolshakovprod-lab.github.io/Zapchastisait/sitemap.xml
+Sitemap: https://dvigatel-ekb.ru/sitemap.xml

@@ -39,4 +39,4 @@ else
 fi
 
 echo
-echo "Готово. Сайт: https://bolshakovprod-lab.github.io/Zapchastisait/"
+echo "Готово. Сайт: https://dvigatel-ekb.ru/"
