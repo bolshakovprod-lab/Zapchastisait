@@ -62,7 +62,8 @@ def detect_group(sh, photo_col):
             return "body"
     return "body"
 
-MARKUP = float(os.environ.get("MARKUP", "1.0"))   # наценка: 1.3 = +30%
+MARKUP = float(os.environ.get("MARKUP", "1.33"))   # наценка: 1.33 = +33%
+ROUND_TO = 500                                     # округление цены вверх, ₽
 
 def s(v):
     """Ячейка -> чистая строка (1С отдаёт числа как 55272425.0, пустоту как 0 и «-»)."""
@@ -128,8 +129,9 @@ for fname in files:
         invnn = g("invnn")
         if not invnn:
             continue
-        price = sh.cell_value(r, hdr["price_min"])
-        price = int(round(float(price or 0) * MARKUP))
+        price = float(sh.cell_value(r, hdr["price_min"]) or 0) * MARKUP
+        # округляем вверх до ROUND_TO, чтобы в каталоге не было цен вида 86 450 ₽
+        price = int(-(-price // ROUND_TO) * ROUND_TO) if price else 0
         name = g("name").strip().lower()
         if ONLY_CATS and name not in ONLY_CATS:
             continue
