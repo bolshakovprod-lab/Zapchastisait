@@ -149,6 +149,9 @@ h1,h2{letter-spacing:-.02em}
 .cta .wa{background:var(--wa);color:#06331a}
 .cta .tg{background:#2AABEE;color:#04283a}
 .m-note{font-size:13.5px;color:var(--muted);margin-top:12px}
+.m-desc{font-size:14.5px;margin:0 0 10px;line-height:1.5}
+.m-note-warn{font-size:14px;margin:0 0 10px;padding:9px 12px;border-radius:10px;
+  background:rgba(232,68,42,.09);border:1px solid rgba(232,68,42,.25)}
 .m-guarantee{display:flex;gap:8px;align-items:flex-start;background:var(--bg);
   border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:12px;font-size:13.5px}
 .m-guarantee svg{flex:none;color:var(--ok)}

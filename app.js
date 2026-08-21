@@ -143,8 +143,8 @@ async function load() {
     return;
   }
   DB.items.forEach(it => {
-    it._h = [it.n, it.x, it.b, it.m, it.k, it.e, it.d, it.o, it.t, it.y].join(' ').toLowerCase();
-    it._a = alnum(it.d + ' ' + it.o);
+    it._h = [it.n, it.x, it.a, it.b, it.m, it.k, it.e, it.d, it.o, it.t, it.y].join(' ').toLowerCase();
+    it._a = alnum(it.d + ' ' + it.o + ' ' + it.a);
   });
   heroStats();
   fill(els.brand, DB.brands);
@@ -197,6 +197,8 @@ function apply(push = true) {
 }
 
 const kmText = km => (km * 1000).toLocaleString('ru-RU') + ' км';
+// характеристики — это хвост описания после тире
+const details = it => (it.t || '').split(' — ')[1]?.replace(/\.$/, '') || carLine(it);
 function tags(it) {
   const list = [];
   if (it.kind) list.push(`<span class="tag">${esc(it.kind)}</span>`);
@@ -213,8 +215,8 @@ function render() {
              onerror="this.parentNode.innerHTML='<span class=nophoto>без фото</span>'">`
         : '<span class="nophoto">без фото</span>'}</div>
       <div class="card-b">
-        <div class="card-title">${esc(cap(it.t || it.n))}</div>
-        <div class="card-car">${esc(carLine(it))}${it.y ? ', ' + esc(it.y) : ''}</div>
+        <div class="card-title">${esc(it.ti || cap(it.n))}</div>
+        <div class="card-car">${esc(details(it))}</div>
         <div class="card-price">${money(it.p)}</div>
       </div>
     </article>`).join('');
@@ -230,7 +232,7 @@ function openPart(i, g) {
   const shots = Array.from({ length: it.f }, (_, k) => photoUrl(it, k + 1));
   const row = (k, v) => v ? `<tr><td>${k}</td><td>${esc(v)}</td></tr>` : '';
   const msg = encodeURIComponent(
-    `Здравствуйте! Интересует: ${cap(it.t || it.n)} (${carLine(it)}), артикул ${it.i}, ${money(it.p)}. В наличии?`);
+    `Здравствуйте! Интересует ${it.ti || it.n}, артикул ${it.a}, ${money(it.p)}. В наличии?`);
 
   els.modalBody.innerHTML = `
     <div class="m-top">
@@ -243,14 +245,16 @@ function openPart(i, g) {
           : `<div class="gal-main" style="display:grid;place-items:center;color:var(--muted)">Фото нет</div>`}
       </div>
       <div>
-        <h2 class="m-title">${esc(cap(it.t || it.n))}</h2>
+        <h2 class="m-title">${esc(it.ti || cap(it.n))}</h2>
         <div class="m-tags">
           <span class="tag">${esc(it.c)}</span>
           ${it.kind ? `<span class="tag">${esc(it.kind)}</span>` : ''}
           ${it.km ? `<span class="tag">пробег ${kmText(it.km)}</span>` : ''}
-          <span class="tag">арт. ${esc(it.i)}</span>
+          <span class="tag">арт. ${esc(it.a)}</span>
         </div>
         <div class="m-price">${money(it.p)}</div>
+        <p class="m-desc">${esc(it.t)}</p>
+        ${it.note ? `<p class="m-note-warn">Комплектация: ${esc(it.note)}</p>` : ''}
         <table class="specs">
           ${row('Марка', it.b)}${row('Модель', it.m)}${row('Кузов', it.k)}
           ${row('Двигатель', it.e)}${row('Год', it.y)}${row('Расположение', it.s)}

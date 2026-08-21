@@ -3,6 +3,7 @@
 Запуск:  ./venv/bin/python build.py
 """
 import xlrd, json, os, re, sys
+from describe import describe, article, brand_ru
 
 PRICES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prices")
 PHOTO_BASE = {"body": "https://avtodik.ru/picture/images_body/",
@@ -137,8 +138,13 @@ for fname in files:
             continue
         name = MERGE_CATS.get(name, name)
         marka = g("marka").upper()
+        km = mileage(g("remark"), g("comment"))
+        kind = gearbox_kind(name, g("remark"), g("comment"), g("modelN"), g("oem_code"))
+        title, text, note = describe(name, kind, marka, g("model"), g("kuzovN"),
+                                     g("engineN"), g("modelN"), km, g("ayear"), g("remark"))
         it = {
-            "i": invnn,                       # номер на складе поставщика
+            "a": article(invnn),              # наш артикул
+            "i": invnn,                       # склад поставщика; уйдёт, когда фото переедут к нам
             "g": group,                       # body | engine
             "n": name,                        # категория/наименование
             "b": marka,                       # марка
@@ -149,12 +155,16 @@ for fname in files:
             "o": g("oem_code"),               # OEM-номера
             "p": price,
             "y": g("ayear"),                  # год
-            "t": g("remark") or g("comment"), # описание
+            "t": text,                        # своё описание, собрано из полей
+            "ti": title,
+            "note": note,                     # пометки о комплектации
             "c": g("condition") or "Б/у",
             "f": photos(sh.cell_value(r, hdr["photo"]), group, invnn),
-            "x": search_words(name, g("remark"), g("comment"), g("modelN"), g("oem_code")),
-            "km": mileage(g("remark"), g("comment")),   # пробег, тыс. км (0 = не указан)
-            "kind": gearbox_kind(name, g("remark"), g("comment"), g("modelN"), g("oem_code")),
+            "x": " ".join(filter(None, [
+                search_words(name, g("remark"), g("comment"), g("modelN"), g("oem_code")),
+                brand_ru(marka)])),
+            "km": km,                         # пробег, тыс. км (0 = не указан)
+            "kind": kind,
         }
         # сторона (перед/зад, лево/право, верх/низ)
         side = " ".join(x for x in (g("F_R"), g("R_L"), g("U_D")) if x)
@@ -178,5 +188,10 @@ out = {
 os.makedirs("data", exist_ok=True)
 with open("data/parts.json", "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
+with open("articles.csv", "w", encoding="utf-8") as f:
+    f.write("наш артикул;артикул поставщика;описание\n")
+    for it in items:
+        f.write(f'{it["a"]};{it["i"]};{it["t"]}\n')
+
 print("позиций:", len(items), "| марок:", len(brands), "| категорий:", len(cats))
 print("размер:", round(os.path.getsize("data/parts.json") / 1048576, 2), "МБ")
