@@ -92,8 +92,11 @@ def head(title, desc, url, image=None, extra=""):
 <body>"""
 
 
-def header(depth):
+def header(depth, active=None):
     up = "../" * depth
+    menu = "".join(
+        f'<a class="nav-item{" on" if k == active else ""}" href="{up}{cat_url(k)}">{E(v["short"])}</a>'
+        for k, v in CAT_SEO.items())
     return f"""<header class="top">
   <div class="wrap top-in">
     <a class="logo" href="{up}"><span class="logo-mark">ДК</span><span class="logo-text">{E(SHOP)}</span></a>
@@ -102,7 +105,13 @@ def header(depth):
       {f'<a class="btn-wa" href="https://wa.me/{WA}" target="_blank" rel="noopener">WhatsApp</a>' if WA else ''}
     </div>
   </div>
-</header>"""
+</header>
+<nav class="subnav" aria-label="Разделы каталога">
+  <div class="wrap subnav-in">
+    <a class="nav-item" href="{up}">Весь каталог</a>
+    {menu}
+  </div>
+</nav>"""
 
 
 def footer(depth, links=""):
@@ -261,37 +270,6 @@ document.querySelectorAll('.gal-strip img').forEach(t => t.onclick = () => {{
     return head(title, desc, url, shots[0] if shots else None, ld) + body
 
 
-def listing_page(items, url, title, desc, h1, intro, chain, pages=None, page=1):
-    """Страница списка: категория, категория+марка или марка."""
-    cards = "".join(card(it, 1) for it in items)
-    nav = ""
-    if pages and len(pages) > 1:
-        links = "".join(
-            f'<span class="pg on">{n}</span>' if n == page
-            else f'<a class="pg" href="../{u}">{n}</a>'
-            for n, u in enumerate(pages, 1))
-        nav = f'<div class="pager">{links}</div>'
-
-    ld = json.dumps({
-        "@context": "https://schema.org", "@type": "ItemList",
-        "numberOfItems": len(items),
-        "itemListElement": [
-            {"@type": "ListItem", "position": n,
-             "url": f"{SITE}/{part_url(it)}", "name": it["ti"]}
-            for n, it in enumerate(items[:20], 1)]
-    }, ensure_ascii=False)
-
-    return head(title, desc, url, extra=f'<script type="application/ld+json">{ld}</script>') + f"""{header(1)}
-<main class="wrap doc">
-  {crumbs(1, chain)}
-  <h1>{E(h1)}</h1>
-  {intro}
-  <div class="grid">{cards}</div>
-  {nav}
-</main>
-{footer(1)}"""
-
-
 def help_block(what="агрегат"):
     """Главный призыв: не «купить», а «спросить». Продаёт консультация."""
     wa = f'https://wa.me/{WA}?text=Здравствуйте!%20Помогите%20подобрать%20{what}' if WA else ""
@@ -311,7 +289,7 @@ def help_block(what="агрегат"):
 
 
 def listing_page(items, url, title, desc, h1, intro, chain, nav_html="",
-                 pages=None, page=1, what="агрегат"):
+                 pages=None, page=1, what="агрегат", active=None):
     """Страница списка: категория, марка, модель."""
     cards = "".join(card(it, 1) for it in items)
     pager = ""
@@ -331,7 +309,7 @@ def listing_page(items, url, title, desc, h1, intro, chain, nav_html="",
             for n, it in enumerate(items[:20], 1)]
     }, ensure_ascii=False)
 
-    return head(title, desc, url, extra=f'<script type="application/ld+json">{ld}</script>') + f"""{header(1)}
+    return head(title, desc, url, extra=f'<script type="application/ld+json">{ld}</script>') + f"""{header(1, active)}
 <main class="wrap doc">
   {crumbs(1, chain)}
   <h1>{E(h1)}</h1>
@@ -374,7 +352,7 @@ def build_listings():
                 cat_description(cat, None, CITY_IN, len(rows), PHONE),
                 c["many"] + (f" — страница {n}" if n > 1 else ""),
                 intro, [("Главная", ""), (c["many"], None)],
-                brand_tiles if n == 1 else "", urls, n, one)))
+                brand_tiles if n == 1 else "", urls, n, one, cat)))
 
         # ── категория + марка, с плиткой моделей
         for b in brands:
@@ -394,7 +372,7 @@ def build_listings():
                 cat_description(cat, b, CITY_IN, len(rows_b), PHONE),
                 f'{c["many"]} {b.title()}', intro,
                 [("Главная", ""), (c["many"], cat_url(cat)), (b.title(), None)],
-                model_tiles, what=f'{one} {b.title()}')))
+                model_tiles, what=f'{one} {b.title()}', active=cat)))
 
             # ── категория + марка + модель
             for m in models:
@@ -414,7 +392,7 @@ def build_listings():
                     f'{c["many"]} {name}', intro_m,
                     [("Главная", ""), (c["many"], cat_url(cat)),
                      (b.title(), cat_url(cat, b)), (m, None)],
-                    what=f'{one} {name}')))
+                    what=f'{one} {name}', active=cat)))
 
     # ── страницы марок целиком
     for b, total in BRANDS.items():
