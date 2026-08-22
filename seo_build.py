@@ -127,6 +127,8 @@ def footer(depth, links=""):
     <div class="muted">{links}</div>
   </div>
 </footer>
+<script src="{up}config.js"></script>
+<script src="{up}analytics.js"></script>
 </body>
 </html>"""
 
