@@ -169,6 +169,7 @@ async function load() {
     it._a = alnum(it.d + ' ' + it.o + ' ' + it.a);
   });
   heroStats();
+  sectionCounts();
   fill(els.brand, DB.brands);
   brandLinks();
   fill(els.cat, DB.cats.map(([n, c]) => [catLabel(n), c]), DB.cats.map(([n]) => n));
@@ -183,6 +184,15 @@ function fill(sel, pairs, values) {
     o.textContent = `${label} (${count})`;
     return o;
   }));
+}
+
+// количество агрегатов в кнопках разделов
+function sectionCounts() {
+  const counts = Object.fromEntries(DB.cats);
+  document.querySelectorAll('.sc-count').forEach(el => {
+    const n = counts[el.dataset.cat] || 0;
+    el.textContent = n + ' ' + plural(n, 'агрегат', 'агрегата', 'агрегатов');
+  });
 }
 
 // ссылки на страницы марок — путь робота вглубь каталога
