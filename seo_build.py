@@ -30,14 +30,42 @@ ADDRESS = cfg_val("address", "")
 d = json.load(open("data/parts.json", encoding="utf-8"))
 ITEMS = d["items"]
 
-# для каких пар «категория + марка» страница вообще создаётся
-PAIRS = {}
+def brands_of(it):
+    return it.get("bs") or [it["b"]]
+
+
+def models_of(it):
+    return it.get("ms") or ([it["m"]] if it["m"] else [])
+
+
+# сколько позиций в каждом разрезе — по ним решаем, какие страницы создавать
+PAIRS, TRIPLES, BRANDS = {}, {}, {}
 for _it in ITEMS:
-    PAIRS[(_it["n"], _it["b"])] = PAIRS.get((_it["n"], _it["b"]), 0) + 1
+    for _b in brands_of(_it):
+        BRANDS[_b] = BRANDS.get(_b, 0) + 1
+        PAIRS[(_it["n"], _b)] = PAIRS.get((_it["n"], _b), 0) + 1
+        for _m in models_of(_it):
+            TRIPLES[(_it["n"], _b, _m)] = TRIPLES.get((_it["n"], _b, _m), 0) + 1
 
 
 def has_pair(cat, brand):
     return PAIRS.get((cat, brand), 0) >= MIN_FOR_PAGE
+
+
+def has_triple(cat, brand, model):
+    return TRIPLES.get((cat, brand, model), 0) >= MIN_FOR_PAGE
+
+
+def tiles(items, title=None):
+    """Плитки-ссылки: название и количество. Заменяют строку ссылок через точку."""
+    if not items:
+        return ""
+    cells = "".join(
+        f'<a class="tile" href="../{url}"><span class="tile-n">{E(name)}</span>'
+        f'<span class="tile-c">{count}</span></a>'
+        for name, url, count in items)
+    head = f'<h2 class="tiles-h">{E(title)}</h2>' if title else ""
+    return f'{head}<div class="tiles">{cells}</div>'
 E = lambda s: html.escape(str(s or ""), quote=True)
 
 
@@ -215,6 +243,8 @@ def part_page(it):
     Отправка из {E(CITY_IN)} до транспортной компании — бесплатно, дальше — любой ТК до вашего города.</p>
   </section>
 
+  {help_block(f'{cat.get("one", "агрегат")} {it["b"].title()} {it["m"]}'.strip())}
+
   {f'''<section class="similar">
     <h2>Похожие агрегаты {E(it["b"].title())}</h2>
     <div class="grid">{"".join(card(x, 1) for x in similar)}</div>
@@ -262,67 +292,162 @@ def listing_page(items, url, title, desc, h1, intro, chain, pages=None, page=1):
 {footer(1)}"""
 
 
+def help_block(what="агрегат"):
+    """Главный призыв: не «купить», а «спросить». Продаёт консультация."""
+    wa = f'https://wa.me/{WA}?text=Здравствуйте!%20Помогите%20подобрать%20{what}' if WA else ""
+    return f"""<section class="help">
+  <div class="help-in">
+    <div>
+      <h2>Не нашли свой {E(what)}?</h2>
+      <p>Пришлите VIN или марку с моделью — проверим по складу и подберём то,
+      что точно встанет на вашу машину. Ответим и подскажем, даже если у нас этого нет.</p>
+    </div>
+    <div class="help-cta">
+      <a class="call" href="tel:{E(PHONE_TEL)}">Позвонить {E(PHONE)}</a>
+      {f'<a class="wa" href="{wa}" target="_blank" rel="noopener">Спросить в WhatsApp</a>' if wa else ''}
+    </div>
+  </div>
+</section>"""
+
+
+def listing_page(items, url, title, desc, h1, intro, chain, nav_html="",
+                 pages=None, page=1, what="агрегат"):
+    """Страница списка: категория, марка, модель."""
+    cards = "".join(card(it, 1) for it in items)
+    pager = ""
+    if pages and len(pages) > 1:
+        links = "".join(
+            f'<span class="pg on">{n}</span>' if n == page
+            else f'<a class="pg" href="../{u}">{n}</a>'
+            for n, u in enumerate(pages, 1))
+        pager = f'<div class="pager">{links}</div>'
+
+    ld = json.dumps({
+        "@context": "https://schema.org", "@type": "ItemList",
+        "numberOfItems": len(items),
+        "itemListElement": [
+            {"@type": "ListItem", "position": n,
+             "url": f"{SITE}/{part_url(it)}", "name": it["ti"]}
+            for n, it in enumerate(items[:20], 1)]
+    }, ensure_ascii=False)
+
+    return head(title, desc, url, extra=f'<script type="application/ld+json">{ld}</script>') + f"""{header(1)}
+<main class="wrap doc">
+  {crumbs(1, chain)}
+  <h1>{E(h1)}</h1>
+  {intro}
+  {nav_html}
+  <div class="grid">{cards}</div>
+  {pager}
+  {help_block(what)}
+</main>
+{footer(1)}"""
+
+
 def build_listings():
     made = []
     by_cat = {}
-    by_brand = {}
     for it in ITEMS:
         by_cat.setdefault(it["n"], []).append(it)
-        by_brand.setdefault(it["b"], []).append(it)
 
-    # категории и связки «категория + марка»
     for cat, rows in by_cat.items():
         c = CAT_SEO[cat]
+        one = c["one"]
+
+        # какие марки есть в этой категории
+        brands = sorted({b for it in rows for b in brands_of(it)})
+        brand_tiles = tiles(
+            [(b.title(), cat_url(cat, b), PAIRS[(cat, b)])
+             for b in brands if has_pair(cat, b)],
+            "Выберите марку")
+
+        # ── страница категории (с пагинацией)
         chunks = [rows[i:i + PER_PAGE] for i in range(0, len(rows), PER_PAGE)] or [[]]
         urls = [cat_url(cat, page=n) for n in range(1, len(chunks) + 1)]
-        brands = sorted({it["b"] for it in rows})
-        brand_links = " · ".join(
-            f'<a href="../{cat_url(cat, b)}">{E(b.title())}</a>'
-            for b in brands if len([x for x in rows if x["b"] == b]) >= MIN_FOR_PAGE)
         for n, (chunk, u) in enumerate(zip(chunks, urls), 1):
-            intro = f"""<p class="lead">{E(c["many"])} в наличии в {E(CITY_IN)} — {len(rows)} позиций
-            с фотографиями, ценами и пробегом. Проверяем перед отправкой, отправляем фото и видео
-            до оплаты, помогаем подобрать по VIN.</p>
-            <p class="muted">Марки: {brand_links}</p>""" if n == 1 else ""
+            intro = (f'<p class="lead">{E(c["many"])} в наличии в {E(CITY_IN)} — {len(rows)} позиций '
+                     f'с фотографиями, ценами и пробегом. Проверяем перед отправкой, отправляем фото '
+                     f'и видео до оплаты, помогаем подобрать по VIN.</p>') if n == 1 else ""
             made.append((u, listing_page(
                 chunk, u,
                 cat_title(cat, None, CITY_IN, len(rows)) + (f" — страница {n}" if n > 1 else ""),
                 cat_description(cat, None, CITY_IN, len(rows), PHONE),
                 c["many"] + (f" — страница {n}" if n > 1 else ""),
-                intro, [("Главная", ""), (c["many"], None)], urls, n)))
+                intro, [("Главная", ""), (c["many"], None)],
+                brand_tiles if n == 1 else "", urls, n, one)))
 
+        # ── категория + марка, с плиткой моделей
         for b in brands:
-            rows_b = [x for x in rows if x["b"] == b]
-            if len(rows_b) < MIN_FOR_PAGE:
+            if not has_pair(cat, b):
                 continue
+            rows_b = [it for it in rows if b in brands_of(it)]
+            models = sorted({m for it in rows_b for m in models_of(it)})
+            model_tiles = tiles(
+                [(m, cat_url(cat, b, m), TRIPLES[(cat, b, m)])
+                 for m in models if has_triple(cat, b, m)],
+                "Выберите модель")
             u = cat_url(cat, b)
-            models = sorted({x["m"] for x in rows_b if x["m"]})[:12]
-            intro = f"""<p class="lead">{E(c["many"])} для {E(b.title())} — {len(rows_b)} шт. в наличии
-            в {E(CITY_IN)}. Гарантия, доставка по России, бесплатный подбор по VIN.</p>
-            <p class="muted">Модели: {E(", ".join(models))}</p>"""
+            intro = (f'<p class="lead">{E(c["many"])} для {E(b.title())} — {len(rows_b)} шт. в наличии '
+                     f'в {E(CITY_IN)}. Гарантия, доставка по России, бесплатный подбор по VIN.</p>')
             made.append((u, listing_page(
-                rows_b, u, cat_title(cat, b, CITY_IN, len(rows_b)),
+                rows_b[:PER_PAGE], u, cat_title(cat, b, CITY_IN, len(rows_b)),
                 cat_description(cat, b, CITY_IN, len(rows_b), PHONE),
                 f'{c["many"]} {b.title()}', intro,
-                [("Главная", ""), (c["many"], cat_url(cat)), (b.title(), None)])))
+                [("Главная", ""), (c["many"], cat_url(cat)), (b.title(), None)],
+                model_tiles, what=f'{one} {b.title()}')))
 
-    # страницы марок целиком
-    for b, rows in by_brand.items():
-        if len(rows) < MIN_FOR_PAGE:
+            # ── категория + марка + модель
+            for m in models:
+                if not has_triple(cat, b, m):
+                    continue
+                rows_m = [it for it in rows_b if m in models_of(it)]
+                um = cat_url(cat, b, m)
+                name = f'{b.title()} {m}'
+                intro_m = (f'<p class="lead">{E(c["many"])} для {E(name)} — {len(rows_m)} шт. в наличии. '
+                           f'В карточке указаны пробег, номер агрегата и OEM-номера: '
+                           f'сверьте со своим или пришлите VIN, проверим за вас.</p>')
+                made.append((um, listing_page(
+                    rows_m, um,
+                    f'{c["many"]} {name} — купить бу в {CITY_IN}, {len(rows_m)} в наличии',
+                    f'{c["many"]} для {name} в наличии в {CITY_IN}: {len(rows_m)} шт. с фото, '
+                    f'ценами и пробегом. Гарантия, доставка по России, подбор по VIN. Тел. {PHONE}',
+                    f'{c["many"]} {name}', intro_m,
+                    [("Главная", ""), (c["many"], cat_url(cat)),
+                     (b.title(), cat_url(cat, b)), (m, None)],
+                    what=f'{one} {name}')))
+
+    # ── страницы марок целиком
+    for b, total in BRANDS.items():
+        if total < MIN_FOR_PAGE:
             continue
+        rows_b = [it for it in ITEMS if b in brands_of(it)]
         u = brand_url(b)
-        cats = " · ".join(f'<a href="../{cat_url(c)}">{E(CAT_SEO[c]["many"])}</a>'
-                          for c in sorted({x["n"] for x in rows}))
-        intro = f"""<p class="lead">Контрактные двигатели и коробки передач {E(b.title())} —
-        {len(rows)} агрегатов в наличии в {E(CITY_IN)}: с фото, ценами и пробегом.</p>
-        <p class="muted">Разделы: {cats}</p>"""
+        cat_tiles = tiles(
+            [(CAT_SEO[c]["many"], cat_url(c, b), PAIRS[(c, b)])
+             for c in sorted({x["n"] for x in rows_b}) if has_pair(c, b)],
+            "Что есть для этой марки")
+        models = sorted({m for it in rows_b for m in models_of(it)})
+        model_counts = {}
+        for it in rows_b:
+            for m in models_of(it):
+                model_counts[m] = model_counts.get(m, 0) + 1
+        model_tiles = tiles(
+            [(m, cat_url(rows_b[0]["n"], b, m) if has_triple(rows_b[0]["n"], b, m)
+              else cat_url(next(c for c in ("двс", "акпп", "мкпп", "раздаточная коробка")
+                                if has_triple(c, b, m)), b, m), model_counts[m])
+             for m in models
+             if any(has_triple(c, b, m) for c in ("двс", "акпп", "мкпп", "раздаточная коробка"))],
+            "Модели")
+        intro = (f'<p class="lead">Контрактные двигатели и коробки передач {E(b.title())} — '
+                 f'{total} агрегатов в наличии в {E(CITY_IN)}: с фото, ценами и пробегом.</p>')
         made.append((u, listing_page(
-            rows[:PER_PAGE], u,
-            f'Контрактные двигатели и КПП {b.title()} — купить бу в {CITY_IN}, {len(rows)} в наличии',
-            f'Контрактные двигатели, АКПП и МКПП {b.title()} в наличии в {CITY_IN}: {len(rows)} агрегатов '
+            rows_b[:PER_PAGE], u,
+            f'Контрактные двигатели и КПП {b.title()} — купить бу в {CITY_IN}, {total} в наличии',
+            f'Контрактные двигатели, АКПП и МКПП {b.title()} в наличии в {CITY_IN}: {total} агрегатов '
             f'с фото и ценами. Гарантия, доставка по России, подбор по VIN. Тел. {PHONE}',
             f'Двигатели и коробки {b.title()}', intro,
-            [("Главная", ""), (b.title(), None)])))
+            [("Главная", ""), (b.title(), None)],
+            cat_tiles + model_tiles, what=f'агрегат на {b.title()}')))
     return made
 
 

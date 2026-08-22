@@ -56,10 +56,12 @@ def part_url(it):
     return "p/" + translit("-".join(str(x) for x in parts if x))[:110] + ".html"
 
 
-def cat_url(cat, brand=None, page=1):
+def cat_url(cat, brand=None, model=None, page=1):
     slug = CAT_SEO[cat]["slug"]
     if brand:
         slug += "-" + brand_slug(brand)
+    if model:
+        slug += "-" + translit(model)[:40]
     if page > 1:
         slug += f"-{page}"
     return f"k/{slug}.html"

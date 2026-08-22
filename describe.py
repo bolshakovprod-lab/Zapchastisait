@@ -158,3 +158,56 @@ def brand_ru(marka):
         if part in BRAND_RU:
             out.append(BRAND_RU[part])
     return " ".join(out)
+
+
+# ─── Навигация: марки и модели ───────────────────────────────────────────
+# В прайсе марки и модели пишутся через слэш: «CITROEN/PEUGEOT», «AXELA/PREMACY».
+# Для навигации разбиваем их — агрегат честно относится к каждой из машин.
+
+def split_list(value):
+    return [x.strip() for x in re.split(r"[/]", value or "") if x.strip()]
+
+
+# Японские и мировые названия одной машины. Ключ — как в прайсе, значение — как показываем.
+MODEL_ALIASES = {
+    "MAZDA": {
+        "AXELA": "3 / Axela", "3": "3 / Axela",
+        "ATENZA": "6 / Atenza", "6": "6 / Atenza",
+        "DEMIO": "2 / Demio", "2": "2 / Demio",
+        "REVUE": "2 / Demio", "FORD FESTIVA": "2 / Demio",
+        "FAMILIA": "323 / Familia", "323": "323 / Familia",
+        "CAPELLA": "626 / Capella", "626": "626 / Capella",
+        "PREMACY": "5 / Premacy", "5": "5 / Premacy",
+        "VERISA": "Verisa",
+        "MILLENIA": "Millenia / Xedos 9", "XEDOS 9": "Millenia / Xedos 9",
+        "TELSTAR": "626 / Capella", "CRONOS": "626 / Capella",
+    },
+    "TOYOTA": {"VITZ": "Yaris / Vitz", "YARIS": "Yaris / Vitz"},
+    "HONDA": {"FIT": "Jazz / Fit", "JAZZ": "Jazz / Fit"},
+}
+
+
+def model_name(brands, model):
+    """Приводит модель к одному написанию, если у машины два названия.
+    Ищем среди всех марок позиции: у «FORD/MAZDA CAPELLA» алиас знает Mazda."""
+    key = model.upper()
+    for brand in brands:
+        found = MODEL_ALIASES.get(brand.upper(), {}).get(key)
+        if found:
+            return found
+    return model
+
+
+def brands_of(marka):
+    return split_list(marka.upper())
+
+
+def models_of(marka, model):
+    """Список моделей позиции — уже с учётом синонимов, без повторов."""
+    brands = brands_of(marka)
+    out = []
+    for m in split_list(model):
+        name = model_name(brands, m)
+        if name not in out:
+            out.append(name)
+    return out

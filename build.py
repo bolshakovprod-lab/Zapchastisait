@@ -3,7 +3,7 @@
 Запуск:  ./venv/bin/python build.py
 """
 import xlrd, json, os, re, sys
-from describe import describe, article, brand_ru, file_stem
+from describe import describe, article, brand_ru, file_stem, brands_of, models_of
 
 PRICES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prices")
 PHOTO_BASE = {"big": "photos/big/", "thumb": "photos/thumb/"}
@@ -154,7 +154,9 @@ for fname in files:
             "a": art,                         # наш артикул
             "ph": file_stem(art),             # имя файлов с фото
             "n": name,                        # категория/наименование
-            "b": marka,                       # марка
+            "b": marka,                       # марка как в прайсе
+            "bs": brands_of(marka),           # марки по отдельности — для навигации
+            "ms": models_of(marka, g("model")),  # модели по отдельности, с синонимами
             "m": g("model"),                  # модель
             "k": g("kuzovN"),                 # кузов
             "e": g("engineN"),                # двигатель
@@ -181,8 +183,8 @@ for fname in files:
         sources.append((invnn, int(buy)))
         if name:
             cats[name] = cats.get(name, 0) + 1
-        if marka:
-            brands[marka] = brands.get(marka, 0) + 1
+        for one in brands_of(marka):
+            brands[one] = brands.get(one, 0) + 1
 
 with open("articles.csv", "w", encoding="utf-8") as f:
     f.write("наш артикул;артикул поставщика;закуп;цена на сайте;маржа;описание\n")

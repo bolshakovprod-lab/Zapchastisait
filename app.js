@@ -32,6 +32,13 @@ function contacts() {
   if (S.tagline) $('#heroSub').textContent = S.tagline;
 
   const wa = S.whatsapp ? 'https://wa.me/' + S.whatsapp : '';
+  const call = $('#helpCall');
+  if (call) { call.href = 'tel:' + (S.phoneTel || ''); call.textContent = 'Позвонить ' + (S.phone || ''); }
+  const hwa = $('#helpWa');
+  if (hwa) {
+    if (wa) hwa.href = wa + '?text=' + encodeURIComponent('Здравствуйте! Помогите подобрать агрегат');
+    else hwa.remove();
+  }
   [['#headWa', wa], ['#fabWa', wa]].forEach(([sel, href]) => {
     const el = $(sel);
     if (href) el.href = href; else el.remove();
@@ -157,7 +164,8 @@ async function load() {
     return;
   }
   DB.items.forEach(it => {
-    it._h = [it.n, it.x, it.a, it.b, it.m, it.k, it.e, it.d, it.o, it.t, it.y].join(' ').toLowerCase();
+    it._h = [it.n, it.x, it.a, it.b, (it.bs || []).join(' '), it.m, (it.ms || []).join(' '),
+      it.k, it.e, it.d, it.o, it.t, it.y].join(' ').toLowerCase();
     it._a = alnum(it.d + ' ' + it.o + ' ' + it.a);
   });
   heroStats();
@@ -183,10 +191,12 @@ function brandLinks() {
   if (!box) return;
   const slug = b => b.toLowerCase().replace(/[\/ ]+/g, '-')
     .replace(/[^a-z0-9-]/g, '').replace(/-{2,}/g, '-').replace(/^-|-$/g, '');
-  box.innerHTML = 'Популярные марки: ' + DB.brands
+  box.innerHTML = '<div class="tiles">' + DB.brands
     .filter(([, c]) => c >= 3)
-    .map(([b]) => `<a href="m/${slug(b)}.html">${esc(b.charAt(0) + b.slice(1).toLowerCase())}</a>`)
-    .join(' · ');
+    .map(([b, c]) => `<a class="tile" href="m/${slug(b)}.html">
+      <span class="tile-n">${esc(b.charAt(0) + b.slice(1).toLowerCase())}</span>
+      <span class="tile-c">${c}</span></a>`)
+    .join('') + '</div>';
 }
 
 // ─── фильтрация ───
@@ -198,7 +208,7 @@ function apply(push = true) {
   const onlyPhoto = els.photo.checked, onlyKm = els.km.checked;
 
   view = DB.items.filter(it => {
-    if (b && it.b !== b) return false;
+    if (b && !(it.bs || [it.b]).includes(b)) return false;
     if (c && it.n !== c) return false;
     if (it.p < mn || it.p > mx) return false;
     if (onlyPhoto && !it.f) return false;
