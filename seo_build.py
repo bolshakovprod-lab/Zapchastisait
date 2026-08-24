@@ -448,6 +448,26 @@ def sitemap(urls):
             + body + "</urlset>")
 
 
+def fill_legal_pages():
+    """Вписывает реквизиты прямо в HTML правовых страниц.
+    Раньше их подставлял скрипт — без JS документы выглядели пустыми."""
+    values = {
+        "entity": cfg_val("entity"), "inn": cfg_val("inn"), "ogrn": cfg_val("ogrn"),
+        "address": cfg_val("address"), "email": cfg_val("email"),
+        "updated": cfg_val("updated", "").split("//")[0].strip(),
+        "phone": PHONE, "hours": HOURS,
+    }
+    for name in ("privacy.html", "terms.html"):
+        html_text = open(name, encoding="utf-8").read()
+        for key, val in values.items():
+            html_text = re.sub(
+                rf'(<(\w+) data-legal="{key}">)[^<]*(</\2>)',
+                lambda m, v=val: m.group(1) + E(v or "——————") + m.group(3),
+                html_text)
+        open(name, "w", encoding="utf-8").write(html_text)
+    print("реквизиты вписаны в privacy.html и terms.html")
+
+
 if __name__ == "__main__":
     for folder in ("p", "k", "m"):
         shutil.rmtree(folder, ignore_errors=True)
@@ -459,6 +479,8 @@ if __name__ == "__main__":
         open(u, "w", encoding="utf-8").write(part_page(it))
         urls.append((u, "0.8"))
     print(f"страниц товаров: {len(ITEMS)}")
+
+    fill_legal_pages()
 
     listings = build_listings()
     for u, html_text in listings:
