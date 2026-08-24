@@ -86,6 +86,8 @@ def head(title, desc, url, image=None, extra=""):
 <meta property="og:locale" content="ru_RU">
 {f'<meta property="og:image" content="{SITE}/{image}">' if image else ''}
 <meta name="theme-color" content="#161a23">
+<link rel="icon" href="{'../' if '/' in url else ''}favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="{'../' if '/' in url else ''}apple-touch-icon.png">
 <link rel="stylesheet" href="{'../' if '/' in url else ''}styles.css">
 {extra}
 </head>
@@ -99,7 +101,7 @@ def header(depth, active=None):
         for k, v in CAT_SEO.items())
     return f"""<header class="top">
   <div class="wrap top-in">
-    <a class="logo" href="{up}"><span class="logo-mark">ДК</span><span class="logo-text">{E(SHOP)}</span></a>
+    <a class="logo" href="{up}"><img class="logo-mark" src="{up}logo.png" alt="{E(SHOP)}" width="34" height="34"><span class="logo-text">{E(SHOP)}</span></a>
     <div class="top-contacts">
       <a class="phone" href="tel:{E(PHONE_TEL)}">{E(PHONE)}</a>
       {f'<a class="btn-wa" href="https://wa.me/{WA}" target="_blank" rel="noopener">WhatsApp</a>' if WA else ''}
