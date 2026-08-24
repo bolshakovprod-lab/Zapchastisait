@@ -39,7 +39,7 @@ function contacts() {
     if (wa) hwa.href = wa + '?text=' + encodeURIComponent('Здравствуйте! Помогите подобрать агрегат');
     else hwa.remove();
   }
-  [['#headWa', wa], ['#fabWa', wa]].forEach(([sel, href]) => {
+  [['#headWa', wa]].forEach(([sel, href]) => {
     const el = $(sel);
     if (href) el.href = href; else el.remove();
   });

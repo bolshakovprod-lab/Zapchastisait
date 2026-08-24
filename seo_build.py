@@ -129,6 +129,7 @@ def footer(depth, links=""):
 </footer>
 <script src="{up}config.js"></script>
 <script src="{up}analytics.js"></script>
+<script src="{up}chat.js"></script>
 </body>
 </html>"""
 
