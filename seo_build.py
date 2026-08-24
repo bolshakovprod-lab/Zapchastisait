@@ -24,6 +24,7 @@ CITY_IN = "Екатеринбурге" if CITY == "Екатеринбург" els
 PHONE = cfg_val("phone")
 PHONE_TEL = cfg_val("phoneTel")
 WA = cfg_val("whatsapp")
+TELEGRAM = cfg_val("telegram")
 HOURS = cfg_val("hours")
 ADDRESS = cfg_val("address", "")
 
@@ -208,6 +209,7 @@ def part_page(it):
 
     msg = (f'Здравствуйте! Интересует {it["ti"]}, артикул {it["a"]}, {money(it["p"])}. В наличии?')
     wa = f'https://wa.me/{WA}?text={msg.replace(" ", "%20")}' if WA else ""
+    tg = f'https://t.me/{TELEGRAM}' if TELEGRAM else ""
 
     similar = [x for x in ITEMS if x["n"] == it["n"] and x["b"] == it["b"] and x["a"] != it["a"]][:4]
 
@@ -239,6 +241,7 @@ def part_page(it):
       <div class="cta">
         <a class="call" href="tel:{E(PHONE_TEL)}">Позвонить {E(PHONE)}</a>
         {f'<a class="wa" href="{wa}" target="_blank" rel="noopener">Написать в WhatsApp</a>' if wa else ''}
+        {f'<a class="tg" href="{tg}" target="_blank" rel="noopener">Telegram</a>' if tg else ''}
       </div>
       <div class="m-guarantee">
         <span>Гарантия на проверку и установку · бесплатная доставка до транспортной компании ·
