@@ -16,7 +16,7 @@ window.SHOP = {
 
   // Приёмник заявок с формы: адрес веб-приложения Google Apps Script,
   // которое пересылает заявку в Telegram-бота. Настройка — см. README.
-  formEndpoint: ""
+  formEndpoint: "https://script.google.com/macros/s/AKfycbwbKIu_XiaEQfHIcqCT_YBsXHxYGPIL4nE81Bm0ht_EnPQ8iqtQw4x_U5NqtnAf9gUb/exec"
 };
 
 // Реквизиты продавца. По закону о защите прав потребителей (ст. 9 и 26.1)
