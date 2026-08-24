@@ -325,3 +325,25 @@ a.card{text-decoration:none;color:inherit}
   .chat-widget{right:12px;bottom:12px}
   .chat-list{width:min(250px,calc(100vw - 24px))}
 }
+
+/* ─── форма заявки ─── */
+.lead-form{background:var(--card);border:1.5px solid var(--line);border-radius:16px;
+  padding:22px;margin:30px 0 10px;box-shadow:var(--shadow)}
+.lf-head h2{margin:0 0 6px;font-size:21px}
+.lf-head p{margin:0 0 16px;color:var(--muted);font-size:15px}
+.lf-row{display:grid;grid-template-columns:1fr 1.3fr auto;gap:9px}
+.lf-row input{padding:13px 15px;border:1.5px solid var(--line);border-radius:12px;
+  background:var(--bg);color:var(--ink);font-size:16px;font-family:inherit;min-width:0}
+.lf-row input:focus{outline:none;border-color:var(--accent)}
+.lf-row button{padding:13px 24px;border:0;border-radius:12px;background:var(--accent);
+  color:#fff;font-weight:700;font-size:15.5px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.lf-row button:hover{filter:brightness(1.07)}
+.lf-agree{display:flex;align-items:flex-start;gap:8px;margin-top:11px;
+  font-size:13px;color:var(--muted);line-height:1.4}
+.lf-agree input{margin-top:2px}
+.lf-done{font-size:16px;line-height:1.5}
+@media(max-width:760px){
+  .lf-row{grid-template-columns:1fr}
+  .lead-form{padding:17px}
+  .lf-head h2{font-size:18px}
+}
