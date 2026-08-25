@@ -11,11 +11,14 @@ from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table, Tab
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_RIGHT
 
-F = "/System/Library/Fonts/Supplemental/"
-pdfmetrics.registerFont(TTFont("Body", F + "Arial.ttf"))
-pdfmetrics.registerFont(TTFont("Bold", F + "Arial Bold.ttf"))
-pdfmetrics.registerFont(TTFont("Narrow", F + "Arial Narrow Bold.ttf"))
-pdfmetrics.registerFont(TTFont("Mono", "/System/Library/Fonts/Menlo.ttc"))
+# IBM Plex и Oswald — те же шрифты, что в веб-версии плана.
+# В системных Arial и Menlo нет символа рубля, поэтому берём эти.
+F = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
+pdfmetrics.registerFont(TTFont("Body", os.path.join(F, "PlexSans-Regular.ttf")))
+pdfmetrics.registerFont(TTFont("Bold", os.path.join(F, "PlexSans-SemiBold.ttf")))
+pdfmetrics.registerFont(TTFont("Narrow", os.path.join(F, "Oswald-SemiBold.ttf")))
+pdfmetrics.registerFont(TTFont("Mono", os.path.join(F, "PlexMono-Regular.ttf")))
+pdfmetrics.registerFontFamily("Body", normal="Body", bold="Bold")
 
 INK = colors.HexColor("#14181f")
 SOFT = colors.HexColor("#5b6472")
@@ -33,8 +36,8 @@ S = {
     "lede": ParagraphStyle("lede", fontName="Body", fontSize=10, leading=15, textColor=SOFT,
                            spaceAfter=6),
     "meta": ParagraphStyle("meta", fontName="Mono", fontSize=7.5, leading=11, textColor=SOFT),
-    "h2": ParagraphStyle("h2", fontName="Narrow", fontSize=15, leading=18, textColor=INK,
-                         spaceBefore=16, spaceAfter=3),
+    "h2": ParagraphStyle("h2", fontName="Narrow", fontSize=14, leading=17, textColor=INK,
+                         spaceBefore=0, spaceAfter=0),
     "h3": ParagraphStyle("h3", fontName="Bold", fontSize=9.5, leading=13, textColor=INK,
                          spaceBefore=10, spaceAfter=3),
     "sub": ParagraphStyle("sub", fontName="Body", fontSize=9, leading=13, textColor=SOFT,
@@ -59,16 +62,26 @@ S = {
 
 
 def h2(num, text):
-    t = Table([[Paragraph(num, ParagraphStyle("n", fontName="Mono", fontSize=8,
-                                              textColor=ACCENT, leading=11)),
-                Paragraph(text.upper(), S["h2"])]],
-              colWidths=[13 * mm, None])
+    """Номер в рамке, заголовок отдельной колонкой — иначе рамка налезает на текст."""
+    badge = Table([[Paragraph(num, ParagraphStyle("n", fontName="Mono", fontSize=8,
+                                                  textColor=ACCENT, leading=10))]],
+                  colWidths=[9 * mm], rowHeights=[6 * mm])
+    badge.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 0.7, ACCENT),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    t = Table([[badge, Paragraph(text.upper(), S["h2"])]], colWidths=[14 * mm, None])
     t.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-        ("BOX", (0, 0), (0, 0), 0.7, ACCENT),
+        ("RIGHTPADDING", (0, 0), (0, 0), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 12),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
     ]))
     return t
 
@@ -108,10 +121,12 @@ def table(rows, widths, aligns=None, total_row=False):
 def check(items):
     data = []
     for done, title, note in items:
-        mark = "■" if done else "□"
-        color = OK if done else SOFT
-        box = Paragraph(f'<font color="{color.hexval()}">{mark}</font>',
-                        ParagraphStyle("b", fontName="Body", fontSize=11, leading=13))
+        # квадратик рисуем таблицей: символов □ и ■ в шрифте нет
+        box = Table([[""]], colWidths=[3.4 * mm], rowHeights=[3.4 * mm])
+        box.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 0.8, OK if done else LINE),
+            ("BACKGROUND", (0, 0), (-1, -1), OK if done else colors.white),
+        ]))
         body = [Paragraph(f"<b>{title}</b>", S["cell"]), Paragraph(note, S["small"])]
         data.append([box, body])
     t = Table(data, colWidths=[8 * mm, None], hAlign="LEFT")
