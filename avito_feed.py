@@ -11,7 +11,7 @@ from datetime import datetime
 PHOTO_BASE = os.environ.get("AVITO_PHOTO_BASE",
                             "https://bolshakovprod-lab.github.io/avito-foto/")
 MANAGER = "Андрей"
-PHONE = "+79826337406"
+PHONE = "+79820252892"
 ADDRESS = "Свердловская область, Екатеринбург"
 MAX_PHOTOS = 5
 MAX_ADS = int(os.environ.get("AVITO_MAX_ADS", "0"))   # 0 = все позиции

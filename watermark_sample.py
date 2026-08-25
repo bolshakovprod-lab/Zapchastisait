@@ -3,7 +3,7 @@
 from PIL import Image, ImageDraw, ImageFont
 import os, sys
 
-PHONE = "+7 982 633-74-06"
+PHONE = "+7 982 025-28-92"
 SITE = "Двигатели и КПП · Екатеринбург"
 FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 OUT = sys.argv[1] if len(sys.argv) > 1 else "."

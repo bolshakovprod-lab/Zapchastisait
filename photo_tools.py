@@ -2,7 +2,7 @@
 """Обработка фото: зеркало, обрезка, поворот, контраст, плашка с телефоном."""
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
-PHONE = "+7 982 633-74-06"
+PHONE = "+7 982 025-28-92"
 SITE = "Двигатели и КПП · Екатеринбург"
 FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 
