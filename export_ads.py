@@ -83,9 +83,9 @@ DIRECT_ADS = [
     {
         "group": "Установка в Екатеринбурге",
         "url": f"{SITE}/?utm_source=direct&utm_medium=cpc&utm_campaign=ustanovka",
-        "h1": "Двигатель с установкой в Екатеринбурге",
-        "h2": "Свой сервис, гарантия",
-        "text": "Подберём агрегат и поставим. Гарантия на запчасть и на работу.",
+        "h1": "Двигатель с установкой от 27 000 ₽",
+        "h2": "Привезём и поставим",
+        "text": "609 моторов в наличии. Гарантия на агрегат и на работу. Екатеринбург.",
         "keys": ["замена двигателя екатеринбург", "установка контрактного двигателя",
                  "замена акпп екатеринбург", "поменять двигатель на иномарке",
                  "установка двигателя с гарантией"],
@@ -122,10 +122,10 @@ AVITO_TEXTS = [
      f"{SITE}/k/dvigateli.html?utm_source=avito_ads&utm_medium=banner&utm_campaign=dvs"),
     ("Баннер «АКПП от 19 000 ₽»", "Контрактные АКПП и вариаторы от 19 000 ₽",
      f"{SITE}/k/akpp.html?utm_source=avito_ads&utm_medium=banner&utm_campaign=akpp"),
-    ("Баннер «Подбор по VIN»", "Подберём агрегат по VIN за 15 минут",
-     f"{SITE}/?utm_source=avito_ads&utm_medium=banner&utm_campaign=vin"),
-    ("Баннер «Установочный центр»", "Подберём и поставим — свой сервис в Екатеринбурге",
-     f"{SITE}/?utm_source=avito_ads&utm_medium=banner&utm_campaign=ustanovka"),
+    ("Баннер «1 182 в наличии»", "Двигатели и коробки — 1 182 агрегата в наличии",
+     f"{SITE}/?utm_source=avito_ads&utm_medium=banner&utm_campaign=katalog"),
+    ("Баннер «Двигатель с установкой»", "Двигатель с установкой от 27 000 ₽",
+     f"{SITE}/k/dvigateli.html?utm_source=avito_ads&utm_medium=banner&utm_campaign=ustanovka"),
 ]
 
 
