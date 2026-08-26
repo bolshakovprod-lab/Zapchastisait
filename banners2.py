@@ -88,8 +88,63 @@ def wrap(d, text, fnt, max_w):
     return lines
 
 
+def build_wide(size, c, photo):
+    """Раскладка для растяжек вроде 1256×300: текст слева, кнопка справа.
+    Обычный макет там наезжает сам на себя — высоты не хватает."""
+    w, h = size
+    base = collage(photo, size, 0.62, cols=max(4, w // (h or 1)))
+    im = base.convert("RGBA")
+    d = ImageDraw.Draw(im, "RGBA")
+    d.rectangle([0, 0, int(w * 0.66), h], fill=(10, 13, 20, 205))
+
+    pad = int(h * 0.16)
+    f_top = f(FB, h * 0.115)
+    f_big = f(FB, h * 0.26)
+    f_sub = f(FR, h * 0.105)
+    f_cta = f(FB, h * 0.125)
+
+    y = pad
+    d.text((pad, y), c["top"], font=f_top, fill=SOFT)
+    y += int(f_top.size * 1.5)
+    d.rounded_rectangle([pad, y, pad + int(h * 0.28), y + max(2, int(h * 0.018))],
+                        radius=2, fill=ACCENT)
+    y += int(h * 0.07)
+    # ужимаем кегль, пока оффер не влезет в одну строку
+    box_w = int(w * 0.60) - pad * 2
+    size_big = h * 0.26
+    while size_big > h * 0.13:
+        f_big = f(FB, size_big)
+        if d.textlength(c["big"], font=f_big) <= box_w:
+            break
+        size_big *= 0.94
+    d.text((pad, y), c["big"], font=f_big, fill=WHITE)
+    y += int(f_big.size * 1.1)
+    y += int(h * 0.02)
+    for line in wrap(d, c["sub"], f_sub, int(w * 0.60) - pad * 2)[:2]:
+        d.text((pad, y), line, font=f_sub, fill=SOFT)
+        y += int(f_sub.size * 1.3)
+
+    # кнопка справа, по центру высоты; ширину и кегль подгоняем под надпись
+    bh = int(h * 0.34)
+    size_cta = h * 0.125
+    while size_cta > h * 0.075:
+        f_cta = f(FB, size_cta)
+        if d.textlength(c["cta"], font=f_cta) <= w * 0.24 - bh * 0.6:
+            break
+        size_cta *= 0.94
+    bw = int(min(w * 0.30, d.textlength(c["cta"], font=f_cta) + bh * 1.1))
+    bx, by = w - bw - pad, (h - bh) // 2
+    d.rounded_rectangle([bx, by, bx + bw, by + bh], radius=int(bh * 0.3), fill=ACCENT)
+    tw = d.textlength(c["cta"], font=f_cta)
+    d.text((bx + (bw - tw) / 2, by + (bh - f_cta.size) / 2 - f_cta.size * 0.08),
+           c["cta"], font=f_cta, fill=WHITE)
+    return im.convert("RGB")
+
+
 def build(size, c, photo, style="dark"):
     w, h = size
+    if w / h >= 2.2:
+        return build_wide(size, c, photo)
     base = (collage(photo, size, 0.78) if isinstance(photo, list)
             else cover(photo, size, 0.8))
     dark = Image.new("RGB", size, (10, 13, 20))
