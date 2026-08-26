@@ -4,8 +4,10 @@ import json, os
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageFilter
 
 OUT = "banners"
-FB = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
-FR = "/System/Library/Fonts/Supplemental/Arial.ttf"
+# IBM Plex: в системном Arial нет символа рубля
+_HERE = os.path.dirname(os.path.abspath(__file__))
+FB = os.path.join(_HERE, "fonts", "PlexSans-SemiBold.ttf")
+FR = os.path.join(_HERE, "fonts", "PlexSans-Regular.ttf")
 ACCENT = (232, 68, 42)
 WHITE = (255, 255, 255)
 SOFT = (198, 206, 220)
@@ -159,14 +161,15 @@ SIZES = {"400x300": (400, 300), "300x300": (300, 300),
 SIZES_DIRECT = {"1080x1080": (1080, 1080), "1080x607": (1080, 607),
                 "1256x300": (1256, 300)}
 
+# Цены «от» — реальные минимумы каталога, пересчитываются вместе с прайсом
 CREATIVES = [
     {"file": "dvigateli", "cat": "двс",
-     "top": "КОНТРАКТНЫЕ ДВИГАТЕЛИ", "big": "609 моторов",
-     "sub": "Пробег указан · гарантия · доставка",
+     "top": "ДВИГАТЕЛИ НА ИНОМАРКИ", "big": "от 27 000 ₽",
+     "sub": "609 моторов · пробег указан · гарантия",
      "cta": "Смотреть каталог"},
     {"file": "akpp", "cat": "акпп",
-     "top": "АКПП · ВАРИАТОРЫ · DSG", "big": "467 коробок",
-     "sub": "Проверены · фото и видео до оплаты",
+     "top": "АКПП · ВАРИАТОРЫ · DSG", "big": "от 19 000 ₽",
+     "sub": "467 коробок · проверены перед отправкой",
      "cta": "Подобрать коробку"},
     {"file": "vin", "cat": "двс",
      "top": "ПОДБОР ПО VIN", "big": "Ответим за 15 минут",
