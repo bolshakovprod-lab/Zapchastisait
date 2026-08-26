@@ -63,7 +63,21 @@ def detect_group(sh, photo_col):
     return "body"
 
 MARKUP = float(os.environ.get("MARKUP", "1.33"))   # наценка: 1.33 = +33%
-MIN_MARGIN = 14000                                 # но не меньше этой суммы с позиции, ₽
+# Минимальная маржа с позиции — плавающая: 14 000 ₽ на дешёвых агрегатах,
+# 17 500 ₽ на дорогих. Между 5 000 и 50 000 закупа растёт линейно.
+MIN_MARGIN_LOW = 14000
+MIN_MARGIN_HIGH = 17500
+MIN_MARGIN_FROM = 5000
+MIN_MARGIN_TO = 50000
+
+
+def min_margin(buy):
+    if buy <= MIN_MARGIN_FROM:
+        return MIN_MARGIN_LOW
+    if buy >= MIN_MARGIN_TO:
+        return MIN_MARGIN_HIGH
+    k = (buy - MIN_MARGIN_FROM) / (MIN_MARGIN_TO - MIN_MARGIN_FROM)
+    return MIN_MARGIN_LOW + k * (MIN_MARGIN_HIGH - MIN_MARGIN_LOW)
 MIN_BUY = 5000                                     # дешевле этого закупа не публикуем вовсе
 ROUND_TO = 500                                     # округление цены вверх, ₽
 
@@ -137,7 +151,7 @@ for fname in files:
         buy = float(sh.cell_value(r, hdr["price_min"]) or 0)
         if buy and buy < MIN_BUY:
             continue                               # возиться с такой позицией смысла нет
-        price = max(buy * MARKUP, buy + MIN_MARGIN) if buy else 0
+        price = max(buy * MARKUP, buy + min_margin(buy)) if buy else 0
         # округляем вверх до ROUND_TO, чтобы в каталоге не было цен вида 86 450 ₽
         price = int(-(-price // ROUND_TO) * ROUND_TO) if price else 0
         name = g("name").strip().lower()
