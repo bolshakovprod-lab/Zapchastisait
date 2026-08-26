@@ -97,21 +97,25 @@ def build_wide(size, c, photo):
     d = ImageDraw.Draw(im, "RGBA")
     d.rectangle([0, 0, int(w * 0.66), h], fill=(10, 13, 20, 205))
 
-    pad = int(h * 0.16)
-    f_top = f(FB, h * 0.115)
-    f_big = f(FB, h * 0.26)
-    f_sub = f(FR, h * 0.105)
-    f_cta = f(FB, h * 0.125)
+    pad = int(h * 0.13)
+    f_top = f(FB, h * 0.10)
+    f_big = f(FB, h * 0.23)
+    f_sub = f(FR, h * 0.093)
+    f_cta = f(FB, h * 0.115)
 
-    y = pad
+    y = int(h * 0.12)
+    f_city = f(FB, h * 0.075)
+    d.text((pad, y), spaced("ЕКАТЕРИНБУРГ · В НАЛИЧИИ"), font=f_city, fill=ACCENT)
+    y += int(f_city.size * 1.7)
+
     d.text((pad, y), c["top"], font=f_top, fill=SOFT)
-    y += int(f_top.size * 1.5)
+    y += int(f_top.size * 1.4)
     d.rounded_rectangle([pad, y, pad + int(h * 0.28), y + max(2, int(h * 0.018))],
                         radius=2, fill=ACCENT)
-    y += int(h * 0.07)
+    y += int(h * 0.045)
     # ужимаем кегль, пока оффер не влезет в одну строку
     box_w = int(w * 0.60) - pad * 2
-    size_big = h * 0.26
+    size_big = h * 0.23
     while size_big > h * 0.13:
         f_big = f(FB, size_big)
         if d.textlength(c["big"], font=f_big) <= box_w:
@@ -153,9 +157,14 @@ def build(size, c, photo, style="dark"):
     d = ImageDraw.Draw(im, "RGBA")
     pad = int(w * 0.075)
 
-    # ── верх: плашка города
-    f_city = f(FB, w * 0.036)
-    city = "ЕКАТЕРИНБУРГ"
+    # ── верх: плашка города и наличия
+    city = "ЕКАТЕРИНБУРГ · В НАЛИЧИИ"
+    size_city = w * 0.036
+    while size_city > w * 0.022:
+        f_city = f(FB, size_city)
+        if d.textlength(spaced(city), font=f_city) <= w - pad * 3.4:
+            break
+        size_city *= 0.94
     tw = d.textlength(spaced(city), font=f_city)
     d.rounded_rectangle([pad, pad, pad + tw + pad * 0.9, pad + f_city.size * 2.0],
                         radius=int(f_city.size * 0.9), fill=(10, 13, 20, 165))
