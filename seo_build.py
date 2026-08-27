@@ -23,7 +23,7 @@ CITY = cfg_val("city", "Екатеринбурге")
 CITY_IN = "Екатеринбурге" if CITY == "Екатеринбург" else CITY
 PHONE = cfg_val("phone")
 PHONE_TEL = cfg_val("phoneTel")
-WA = cfg_val("whatsapp")
+MAX = cfg_val("max")
 TELEGRAM = cfg_val("telegram")
 HOURS = cfg_val("hours")
 ADDRESS = cfg_val("address", "")
@@ -105,7 +105,7 @@ def header(depth, active=None):
     <a class="logo" href="{up}"><img class="logo-mark" src="{up}logo.png" alt="{E(SHOP)}" width="34" height="34"><span class="logo-text">{E(SHOP)}</span></a>
     <div class="top-contacts">
       <a class="phone" href="tel:{E(PHONE_TEL)}">{E(PHONE)}</a>
-      {f'<a class="btn-wa" href="https://wa.me/{WA}" target="_blank" rel="noopener">WhatsApp</a>' if WA else ''}
+      {f'<a class="btn-max" href="https://max.ru/{MAX}" target="_blank" rel="noopener">MAX</a>' if MAX else ''}
     </div>
   </div>
 </header>
@@ -209,8 +209,8 @@ def part_page(it):
             ("OEM-номера", it["o"]), ("Состояние", it["c"]), ("Артикул", it["a"])]
     table = "".join(f"<tr><td>{E(k)}</td><td>{E(v)}</td></tr>" for k, v in rows if v)
 
-    msg = (f'Здравствуйте! Интересует {it["ti"]}, артикул {it["a"]}, {money(it["p"])}. В наличии?')
-    wa = f'https://wa.me/{WA}?text={msg.replace(" ", "%20")}' if WA else ""
+    # MAX открывает чат без предзаполненного текста: артикул виден в карточке
+    max_link = f'https://max.ru/{MAX}' if MAX else ""
     tg = f'https://t.me/{TELEGRAM}' if TELEGRAM else ""
 
     similar = [x for x in ITEMS if x["n"] == it["n"] and x["b"] == it["b"] and x["a"] != it["a"]][:4]
@@ -242,7 +242,7 @@ def part_page(it):
       <table class="specs">{table}</table>
       <div class="cta">
         <a class="call" href="tel:{E(PHONE_TEL)}">Позвонить {E(PHONE)}</a>
-        {f'<a class="wa" href="{wa}" target="_blank" rel="noopener">Написать в WhatsApp</a>' if wa else ''}
+        {f'<a class="max" href="{max_link}" target="_blank" rel="noopener">Написать в MAX</a>' if max_link else ''}
         {f'<a class="tg" href="{tg}" target="_blank" rel="noopener">Telegram</a>' if tg else ''}
       </div>
       <div class="m-guarantee">
@@ -283,7 +283,7 @@ document.querySelectorAll('.gal-strip img').forEach(t => t.onclick = () => {{
 
 def help_block(what="агрегат"):
     """Главный призыв: не «купить», а «спросить». Продаёт консультация."""
-    wa = f'https://wa.me/{WA}?text=Здравствуйте!%20Помогите%20подобрать%20{what}' if WA else ""
+    max_link = f'https://max.ru/{MAX}' if MAX else ""
     return f"""<section class="help">
   <div class="help-in">
     <div>
@@ -293,7 +293,7 @@ def help_block(what="агрегат"):
     </div>
     <div class="help-cta">
       <a class="call" href="tel:{E(PHONE_TEL)}">Позвонить {E(PHONE)}</a>
-      {f'<a class="wa" href="{wa}" target="_blank" rel="noopener">Спросить в WhatsApp</a>' if wa else ''}
+      {f'<a class="max" href="{max_link}" target="_blank" rel="noopener">Спросить в MAX</a>' if max_link else ''}
     </div>
   </div>
 </section>"""

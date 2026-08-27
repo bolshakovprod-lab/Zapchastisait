@@ -1,6 +1,6 @@
 :root{
   --bg:#f4f5f8; --card:#fff; --ink:#12151d; --muted:#6b7286; --line:#e4e7ee;
-  --accent:#e8442a; --accent-ink:#fff; --wa:#25D366; --ok:#0d8a4f;
+  --accent:#e8442a; --accent-ink:#fff; --max:#7C5CFF; --ok:#0d8a4f;
   --dark:#161a23; --dark-ink:#f2f4f8; --dark-line:#2a3040;
   --radius:14px; --shadow:0 1px 2px rgba(16,20,30,.06), 0 8px 24px rgba(16,20,30,.05);
 }
@@ -23,9 +23,9 @@ h1,h2{letter-spacing:-.02em}
 .logo-mark{width:34px;height:34px;border-radius:10px;flex:none;object-fit:cover;display:block}
 .top-contacts{display:flex;align-items:center;gap:12px}
 .phone{font-weight:800;text-decoration:none;white-space:nowrap;font-size:17px}
-.btn-wa{background:var(--wa);color:#06331a;padding:9px 15px;border-radius:11px;
+.btn-max{background:var(--max);color:#fff;padding:9px 15px;border-radius:11px;
   text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
-.btn-wa:hover{filter:brightness(1.06)}
+.btn-max:hover{filter:brightness(1.06)}
 
 /* ─── герой ─── */
 .hero{background:linear-gradient(170deg,var(--dark) 0%,#1e2534 100%);color:var(--dark-ink);
@@ -116,7 +116,7 @@ h1,h2{letter-spacing:-.02em}
 
 /* ─── плавающая кнопка ─── */
 .fab{position:fixed;right:16px;bottom:16px;z-index:30;display:none;align-items:center;gap:8px;
-  background:var(--wa);color:#06331a;padding:13px 18px;border-radius:30px;text-decoration:none;
+  background:var(--max);color:#fff;padding:13px 18px;border-radius:30px;text-decoration:none;
   font-weight:700;box-shadow:0 6px 20px rgba(37,211,102,.4)}
 
 /* ─── карточка товара ─── */
@@ -145,7 +145,7 @@ h1,h2{letter-spacing:-.02em}
 .cta a{flex:1;min-width:145px;text-align:center;padding:14px;border-radius:var(--radius);
   text-decoration:none;font-weight:700}
 .cta .call{background:var(--accent);color:var(--accent-ink)}
-.cta .wa{background:var(--wa);color:#06331a}
+.cta .max{background:var(--max);color:#fff}
 .cta .tg{background:#2AABEE;color:#04283a}
 .m-note{font-size:13.5px;color:var(--muted);margin-top:12px}
 .m-desc{font-size:14.5px;margin:0 0 10px;line-height:1.5}
@@ -185,7 +185,7 @@ h1,h2{letter-spacing:-.02em}
   .modal-card{padding:16px}
   .fab{display:flex}
   .phone{font-size:15.5px}
-  .btn-wa{display:none}
+  .btn-max{display:none}
   .how h2{font-size:20px}
 }
 
@@ -260,7 +260,7 @@ a.card{text-decoration:none;color:inherit}
 .help-cta a{padding:13px 20px;border-radius:12px;text-decoration:none;font-weight:700;
   white-space:nowrap;font-size:15px}
 .help-cta .call{background:var(--accent);color:#fff}
-.help-cta .wa{background:var(--wa);color:#06331a}
+.help-cta .max{background:var(--max);color:#fff}
 @media(max-width:700px){
   .tiles{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:7px}
   .tile{padding:10px 11px}
@@ -315,7 +315,7 @@ a.card{text-decoration:none;color:inherit}
 .chat-widget{position:fixed;right:16px;bottom:16px;z-index:40;display:flex;
   flex-direction:column;align-items:flex-end;gap:10px}
 .chat-fab{display:flex;align-items:center;gap:8px;border:0;cursor:pointer;
-  background:var(--wa);color:#06331a;padding:13px 18px;border-radius:30px;
+  background:var(--max);color:#fff;padding:13px 18px;border-radius:30px;
   font-weight:700;font-size:15px;box-shadow:0 6px 22px rgba(37,211,102,.4);
   font-family:inherit}
 .chat-fab:hover{filter:brightness(1.05)}

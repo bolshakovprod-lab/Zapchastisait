@@ -14,15 +14,19 @@
   const call = document.getElementById('srvCall');
   if (call) { call.href = 'tel:' + (S.phoneTel || ''); call.textContent = 'Позвонить ' + (S.phone || ''); }
 
-  const msg = encodeURIComponent('Здравствуйте! Хочу записаться на замену агрегата. Машина: ');
-  const wa = document.getElementById('srvWa');
-  if (wa) { if (S.whatsapp) wa.href = `https://wa.me/${S.whatsapp}?text=${msg}`; else wa.remove(); }
+  const maxLink = S.max ? `https://max.ru/${S.max}` : '';
+  const srvMax = document.getElementById('srvMax');
+  if (srvMax) { if (maxLink) srvMax.href = maxLink; else srvMax.remove(); }
+
+  // кнопка в шапке: на этой странице нет app.js, поэтому подставляем здесь
+  const headMax = document.getElementById('headMax');
+  if (headMax) { if (maxLink) headMax.href = maxLink; else headMax.remove(); }
 
   const map = document.getElementById('srvMap');
   if (map) { if (V.map) map.href = V.map; else map.remove(); }
 
   const hCall = document.getElementById('helpCall');
   if (hCall) { hCall.href = 'tel:' + (S.phoneTel || ''); hCall.textContent = 'Позвонить ' + (S.phone || ''); }
-  const hWa = document.getElementById('helpWa');
-  if (hWa) { if (S.whatsapp) hWa.href = `https://wa.me/${S.whatsapp}?text=${msg}`; else hWa.remove(); }
+  const hMax = document.getElementById('helpMax');
+  if (hMax) { if (maxLink) hMax.href = maxLink; else hMax.remove(); }
 })();

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Логотип для аватара: WhatsApp Business, Telegram, Авито."""
+"""Логотип для аватара: MAX, Telegram, Авито."""
 import math, os
 from PIL import Image, ImageDraw, ImageFont
 

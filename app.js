@@ -31,15 +31,15 @@ function contacts() {
   $('.logo-text').textContent = S.name || 'Запчасти';
   if (S.tagline) $('#heroSub').textContent = S.tagline;
 
-  const wa = S.whatsapp ? 'https://wa.me/' + S.whatsapp : '';
+  const max = S.max ? 'https://max.ru/' + S.max : '';
   const call = $('#helpCall');
   if (call) { call.href = 'tel:' + (S.phoneTel || ''); call.textContent = 'Позвонить ' + (S.phone || ''); }
-  const hwa = $('#helpWa');
-  if (hwa) {
-    if (wa) hwa.href = wa + '?text=' + encodeURIComponent('Здравствуйте! Помогите подобрать агрегат');
-    else hwa.remove();
+  const hmax = $('#helpMax');
+  if (hmax) {
+    if (max) hmax.href = max;
+    else hmax.remove();
   }
-  [['#headWa', wa]].forEach(([sel, href]) => {
+  [['#headMax', max]].forEach(([sel, href]) => {
     const el = $(sel);
     if (href) el.href = href; else el.remove();
   });

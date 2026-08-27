@@ -76,7 +76,7 @@
     } catch (err) {
       btn.disabled = false;
       btn.textContent = 'Отправить заявку';
-      alert('Не удалось отправить. Позвоните или напишите в WhatsApp: ' + (S.phone || ''));
+      alert('Не удалось отправить. Позвоните или напишите в MAX: ' + (S.phone || ''));
     }
   });
 })();

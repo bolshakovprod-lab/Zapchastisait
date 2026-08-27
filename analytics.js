@@ -35,39 +35,14 @@
       localStorage.setItem(SOURCE_KEY, JSON.stringify({ label, at: Date.now() }));
     } catch (e) { /* приватный режим */ }
   }
-  function source() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(SOURCE_KEY) || 'null');
-      if (!raw) return '';
-      if (Date.now() - raw.at > 30 * 24 * 3600 * 1000) return '';
-      return raw.label;
-    } catch (e) { return ''; }
-  }
   saveSource();
 
-  // ─── метка источника в текст сообщения WhatsApp ───
-  // Так в переписке сразу видно, с какой рекламы пришёл человек.
-  function tagLinks() {
-    const src = source();
-    if (!src) return;
-    document.querySelectorAll('a[href*="wa.me/"]').forEach(a => {
-      if (a.dataset.tagged) return;
-      a.dataset.tagged = '1';
-      const url = new URL(a.href);
-      const text = url.searchParams.get('text') || '';
-      url.searchParams.set('text', text + ` [${src}]`);
-      a.href = url.toString();
-    });
-  }
-  tagLinks();
-  new MutationObserver(tagLinks).observe(document.body, { childList: true, subtree: true });
-
-  // ─── цели: звонок, WhatsApp, открытие карточки ───
+  // ─── цели: звонок, мессенджеры, открытие карточки ───
   document.addEventListener('click', e => {
     const a = e.target.closest('a');
     if (!a) return;
     if (a.href.startsWith('tel:')) goal('call');
-    else if (a.href.includes('wa.me/')) goal('whatsapp');
+    else if (a.href.includes('max.ru/')) goal('max');
     else if (a.href.includes('t.me/')) goal('telegram');
     else if (/\/p\/[^/]+\.html$/.test(a.getAttribute('href') || '')) goal('part_view');
   });
