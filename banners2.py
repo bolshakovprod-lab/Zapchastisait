@@ -217,6 +217,41 @@ def build(size, c, photo, style="dark"):
     return im.convert("RGB")
 
 
+def num(n):
+    """1182 → «1 182»: в креативах число читается кусками."""
+    return f"{n:,}".replace(",", " ")
+
+
+def plural(n, one, few, many):
+    n10, n100 = n % 10, n % 100
+    if n10 == 1 and n100 != 11:
+        return one
+    if 2 <= n10 <= 4 and not 12 <= n100 <= 14:
+        return few
+    return many
+
+
+def stats(path=None):
+    """Количества и цены «от» — из каталога, иначе реклама разъезжается с сайтом."""
+    path = path or os.path.join(_HERE, "data", "parts.json")
+    items = json.load(open(path, encoding="utf-8"))["items"]
+
+    def pick(*cats):
+        return [i for i in items if i["n"] in cats]
+
+    def lowest(rows):
+        prices = [r["p"] for r in rows if isinstance(r.get("p"), (int, float)) and r["p"] > 0]
+        return min(prices) if prices else 0
+
+    dvs, akpp, mkpp = pick("двс"), pick("акпп"), pick("мкпп")
+    return {
+        "dvs": len(dvs), "akpp": len(akpp), "mkpp": len(mkpp), "all": len(items),
+        "dvs_from": lowest(dvs), "akpp_from": lowest(akpp),
+    }
+
+
+S = stats()
+
 # Форматы Авито Рекламы
 SIZES = {"400x300": (400, 300), "300x300": (300, 300),
          "300x600": (300, 600), "300x900": (300, 900)}
@@ -225,22 +260,22 @@ SIZES = {"400x300": (400, 300), "300x300": (300, 300),
 SIZES_DIRECT = {"1080x1080": (1080, 1080), "1080x607": (1080, 607),
                 "1256x300": (1256, 300)}
 
-# Цены «от» — реальные минимумы каталога, пересчитываются вместе с прайсом
+# Цифры и цены «от» считает stats() из data/parts.json — руками не править
 CREATIVES = [
     {"file": "dvigateli", "cat": "двс",
-     "top": "ДВИГАТЕЛИ НА ИНОМАРКИ", "big": "от 27 000 ₽",
-     "sub": "609 моторов · пробег указан · гарантия",
+     "top": "ДВИГАТЕЛИ НА ИНОМАРКИ", "big": f"от {num(S['dvs_from'])} ₽",
+     "sub": f"{num(S['dvs'])} {plural(S['dvs'], 'мотор', 'мотора', 'моторов')} · пробег указан · гарантия",
      "cta": "Смотреть каталог"},
     {"file": "akpp", "cat": "акпп",
-     "top": "АКПП · ВАРИАТОРЫ · DSG", "big": "от 19 000 ₽",
-     "sub": "467 коробок · проверены перед отправкой",
+     "top": "АКПП · ВАРИАТОРЫ · DSG", "big": f"от {num(S['akpp_from'])} ₽",
+     "sub": f"{num(S['akpp'])} {plural(S['akpp'], 'коробка', 'коробки', 'коробок')} · проверяем перед отправкой",
      "cta": "Подобрать коробку"},
     {"file": "katalog", "cat": "двс",
-     "top": "ДВИГАТЕЛИ И КОРОБКИ", "big": "1 182 в наличии",
+     "top": "ДВИГАТЕЛИ И КОРОБКИ", "big": f"{num(S['all'])} в наличии",
      "sub": "Подберём по VIN за 15 минут · гарантия · доставка",
      "cta": "Смотреть каталог"},
     {"file": "ustanovka", "cat": "акпп",
-     "top": "ДВИГАТЕЛЬ С УСТАНОВКОЙ", "big": "от 27 000 ₽",
+     "top": "ДВИГАТЕЛЬ С УСТАНОВКОЙ", "big": f"от {num(S['dvs_from'])} ₽",
      "sub": "Привезём и поставим в Екатеринбурге · гарантия на работу",
      "cta": "Смотреть каталог"},
 ]
