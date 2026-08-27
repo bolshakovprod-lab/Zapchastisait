@@ -280,14 +280,23 @@ a.card{text-decoration:none;color:inherit}
   font-weight:700;color:var(--ink);background:var(--bg);border:1.5px solid var(--line)}
 .nav-item:hover{border-color:var(--accent);color:var(--accent)}
 .nav-item.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-@media(max-width:700px){.nav-item{font-size:14px;padding:10px 14px}.subnav-in{gap:6px}}
+@media(max-width:700px){
+  /* на телефоне разделы — сетка кнопок, а не лента, которую надо листать вбок */
+  .subnav{overflow:visible}
+  .subnav-in{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;white-space:normal;
+    padding-top:10px;padding-bottom:10px}
+  .nav-item{font-size:14px;padding:12px 10px;text-align:center;line-height:1.25;
+    display:flex;align-items:center;justify-content:center;min-height:44px}
+  .nav-item:first-child{grid-column:1 / -1}
+}
 
 /* ─── крупные кнопки разделов на главной ─── */
-.sections{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 4px}
+.sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:22px 0 4px}
 .section-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;
   background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:18px;
   text-decoration:none;color:inherit;transition:.15s;box-shadow:var(--shadow)}
 .section-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.section-card.srv{border-color:var(--accent);background:linear-gradient(160deg,var(--card) 55%,var(--accent-soft, rgba(232,68,42,.07)) 100%)}
 .section-card svg{color:var(--accent);margin-bottom:2px}
 .sc-name{font-weight:800;font-size:17px;line-height:1.2}
 .sc-count{color:var(--muted);font-size:14px}
@@ -345,4 +354,37 @@ a.card{text-decoration:none;color:inherit}
   .lf-row{grid-template-columns:1fr}
   .lead-form{padding:17px}
   .lf-head h2{font-size:18px}
+}
+
+/* ─── страница установочного центра ─── */
+.srv-lead{display:grid;grid-template-columns:1.15fr 1fr;gap:24px;align-items:start;margin:22px 0 6px}
+.srv-photo img{width:100%;border-radius:14px;display:block;border:1px solid var(--line)}
+.srv-info h2{font-size:24px;margin:0 0 12px}
+.srv-info .specs td:first-child{width:38%}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:8px}
+.gal-grid a{display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  aspect-ratio:4/3;background:var(--card)}
+.gal-grid img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.gal-grid a:hover img{transform:scale(1.04)}
+.srv-gallery{margin:32px 0}
+.how-steps li span{display:block}
+@media(max-width:760px){
+  .srv-lead{grid-template-columns:1fr;gap:16px}
+  .gal-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+}
+
+/* ─── блок сервиса на главной ─── */
+.srv-teaser{display:grid;grid-template-columns:1fr 1.1fr;gap:22px;align-items:center;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:20px;margin:30px 0 6px;box-shadow:var(--shadow)}
+.srv-teaser img{width:100%;border-radius:12px;display:block}
+.srv-teaser h2{margin:0 0 8px;font-size:22px}
+.srv-teaser p{margin:0 0 14px;color:var(--muted);font-size:15.5px;line-height:1.55}
+.srv-teaser .more-link{font-size:15.5px}
+.srv-badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.srv-badges span{font-size:13px;background:var(--bg);border:1px solid var(--line);
+  border-radius:20px;padding:5px 11px;color:var(--ink)}
+@media(max-width:760px){
+  .srv-teaser{grid-template-columns:1fr;padding:14px;gap:14px}
+  .srv-teaser h2{font-size:19px}
 }

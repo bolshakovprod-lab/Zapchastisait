@@ -8,7 +8,7 @@ const els = {
   q: $('#q'), grid: $('#grid'), status: $('#status'), more: $('#more'),
   brand: $('#fBrand'), cat: $('#fCat'),
   min: $('#fMin'), max: $('#fMax'), sort: $('#fSort'), photo: $('#fPhoto'), km: $('#fKm'),
-  filters: $('#filters'), modal: $('#modal'), modalBody: $('#modalBody')
+  filters: $('#filters')
 };
 
 const money = n => n ? n.toLocaleString('ru-RU') + ' ₽' : 'цена по запросу';
@@ -189,7 +189,7 @@ function fill(sel, pairs, values) {
 // количество агрегатов в кнопках разделов
 function sectionCounts() {
   const counts = Object.fromEntries(DB.cats);
-  document.querySelectorAll('.sc-count').forEach(el => {
+  document.querySelectorAll('.sc-count[data-cat]').forEach(el => {
     const n = counts[el.dataset.cat] || 0;
     el.textContent = n + ' ' + plural(n, 'агрегат', 'агрегата', 'агрегатов');
   });
@@ -256,7 +256,7 @@ function tags(it) {
 function render() {
   const part = view.slice(shown, shown + PAGE);
   const html = part.map(it => `
-    <article class="card" data-i="${it.i}" data-g="${it.g}">
+    <a class="card" href="${it.u}">
       <div class="thumb">${tags(it)}${it.f
         ? `<img loading="lazy" src="${photoUrl(it, 1, 'thumb')}" alt="${esc(it.n)} ${esc(carLine(it))}"
              onerror="this.parentNode.innerHTML='<span class=nophoto>без фото</span>'">`
@@ -266,71 +266,10 @@ function render() {
         <div class="card-car">${esc(details(it))}</div>
         <div class="card-price">${money(it.p)}</div>
       </div>
-    </article>`).join('');
+    </a>`).join('');
   els.grid.insertAdjacentHTML('beforeend', html);
   shown += part.length;
   els.more.hidden = shown >= view.length;
-}
-
-// ─── карточка товара ───
-function openPart(i, g) {
-  const it = DB.items.find(x => x.i === i && x.g === g);
-  if (!it) return;
-  const shots = Array.from({ length: it.f }, (_, k) => photoUrl(it, k + 1));
-  const minis = Array.from({ length: it.f }, (_, k) => photoUrl(it, k + 1, 'thumb'));
-  const row = (k, v) => v ? `<tr><td>${k}</td><td>${esc(v)}</td></tr>` : '';
-  const msg = encodeURIComponent(
-    `Здравствуйте! Интересует ${it.ti || it.n}, артикул ${it.a}, ${money(it.p)}. В наличии?`);
-
-  els.modalBody.innerHTML = `
-    <div class="m-top">
-      <div>
-        ${shots.length
-          ? `<img class="gal-main" id="galMain" src="${shots[0]}" alt="${esc(it.n)}">
-             <div class="gal-strip">${minis.map((u, k) =>
-               `<img src="${u}" class="${k ? '' : 'on'}" data-u="${shots[k]}" alt=""
-                  onerror="this.remove()">`).join('')}</div>`
-          : `<div class="gal-main" style="display:grid;place-items:center;color:var(--muted)">Фото нет</div>`}
-      </div>
-      <div>
-        <h2 class="m-title">${esc(it.ti || cap(it.n))}</h2>
-        <div class="m-tags">
-          <span class="tag">${esc(it.c)}</span>
-          ${it.kind ? `<span class="tag">${esc(it.kind)}</span>` : ''}
-          ${it.km ? `<span class="tag">пробег ${kmText(it.km)}</span>` : ''}
-          <span class="tag">арт. ${esc(it.a)}</span>
-        </div>
-        <div class="m-price">${money(it.p)}</div>
-        <p class="m-desc">${esc(it.t)}</p>
-        ${it.note ? `<p class="m-note-warn">Комплектация: ${esc(it.note)}</p>` : ''}
-        <table class="specs">
-          ${row('Марка', it.b)}${row('Модель', it.m)}${row('Кузов', it.k)}
-          ${row('Двигатель', it.e)}${row('Год', it.y)}${row('Расположение', it.s)}
-          ${row('Пробег', it.km ? kmText(it.km) : '')}${row('Тип', it.kind)}
-          ${row('Номер детали', it.d)}${row('OEM-номера', it.o)}
-          ${row('Категория', catLabel(it.n))}
-        </table>
-        <div class="cta">
-          <a class="call" href="tel:${esc(S.phoneTel)}">Позвонить</a>
-          ${S.whatsapp ? `<a class="wa" target="_blank" rel="noopener"
-             href="https://wa.me/${S.whatsapp}?text=${msg}">WhatsApp</a>` : ''}
-          ${S.telegram ? `<a class="tg" target="_blank" rel="noopener"
-             href="https://t.me/${S.telegram}">Telegram</a>` : ''}
-        </div>
-        <div class="m-guarantee">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">${ICONS.shield}</svg>
-          <div>${esc((window.BENEFITS && window.BENEFITS[0] && window.BENEFITS[0].title) || '')} ·
-          бесплатная доставка до ТК</div>
-        </div>
-        <p class="m-note">Отправим фото и видео агрегата до оплаты, поможем с подбором по VIN.</p>
-      </div>
-    </div>`;
-  els.modal.hidden = false;
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  els.modal.hidden = true;
-  document.body.style.overflow = '';
 }
 
 // ─── состояние в адресе страницы ───
@@ -369,19 +308,6 @@ $('#reset').onclick = () => {
   apply();
 };
 els.more.onclick = render;
-els.grid.addEventListener('click', e => {
-  const c = e.target.closest('.card');
-  if (c) openPart(c.dataset.i, c.dataset.g);
-});
-els.modal.addEventListener('click', e => {
-  if (e.target.dataset.close !== undefined) closeModal();
-  const th = e.target.closest('.gal-strip img');
-  if (th) {
-    $('#galMain').src = th.dataset.u;
-    els.modalBody.querySelectorAll('.gal-strip img').forEach(i => i.classList.toggle('on', i === th));
-  }
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 new IntersectionObserver(en => {
   if (en[0].isIntersecting && DB && shown < view.length) render();
 }, { rootMargin: '600px' }).observe($('#sentinel'));

@@ -4,6 +4,7 @@
 """
 import xlrd, json, os, re, sys
 from describe import describe, article, brand_ru, file_stem, brands_of, models_of
+from seo_lib import part_url
 
 PRICES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prices")
 PHOTO_BASE = {"big": "photos/big/", "thumb": "photos/thumb/"}
@@ -193,6 +194,7 @@ for fname in files:
         side = " ".join(x for x in (g("F_R"), g("R_L"), g("U_D")) if x)
         if side:
             it["s"] = side
+        it["u"] = part_url(it)            # адрес страницы товара
         items.append(it)
         sources.append((invnn, int(buy)))
         if name:

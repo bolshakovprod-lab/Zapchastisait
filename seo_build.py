@@ -113,6 +113,7 @@ def header(depth, active=None):
   <div class="wrap subnav-in">
     <a class="nav-item" href="{up}">Весь каталог</a>
     {menu}
+    <a class="nav-item" href="{up}service.html">Установка</a>
   </div>
 </nav>"""
 
@@ -124,7 +125,8 @@ def footer(depth, links=""):
     <div>
       <p><b>{E(SHOP)}</b> · {E(CITY)} · <a href="tel:{E(PHONE_TEL)}">{E(PHONE)}</a></p>
       <p class="muted">{E(HOURS)}</p>
-      <p class="muted"><a href="{up}privacy.html">Политика конфиденциальности</a> ·
+      <p class="muted"><a href="{up}service.html">Установочный центр</a> ·
+      <a href="{up}privacy.html">Политика конфиденциальности</a> ·
       <a href="{up}terms.html">Условия продажи</a> · <a href="{up}">Каталог</a></p>
     </div>
     <div class="muted">{links}</div>
@@ -488,7 +490,7 @@ if __name__ == "__main__":
     print(f"страниц категорий и марок: {len(listings)}")
 
     urls += [(u, "0.6") for u, _ in listings]
-    urls += [("privacy.html", "0.2"), ("terms.html", "0.3")]
+    urls += [("service.html", "0.9"), ("privacy.html", "0.2"), ("terms.html", "0.3")]
     open("sitemap.xml", "w", encoding="utf-8").write(sitemap(urls))
     open("robots.txt", "w", encoding="utf-8").write(
         f"User-agent: *\nAllow: /\nDisallow: /data/\nDisallow: /photos/orig/\n\n"
