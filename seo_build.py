@@ -245,6 +245,7 @@ def part_page(it):
         {f'<a class="max" href="{max_link}" target="_blank" rel="noopener">Написать в MAX</a>' if max_link else ''}
         {f'<a class="tg" href="{tg}" target="_blank" rel="noopener">Telegram</a>' if tg else ''}
       </div>
+      {f'<p class="cta-hint">Нажмёте «Написать в MAX» — текст с артикулом и ценой скопируется, останется вставить его в чат</p>' if max_link else ''}
       <div class="m-guarantee">
         <span>Гарантия на проверку и установку · бесплатная доставка до транспортной компании ·
         отправим фото и видео агрегата до оплаты</span>

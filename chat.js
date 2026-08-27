@@ -12,7 +12,10 @@
     const t = (h1 ? h1.textContent : document.title).trim();
     const art = document.querySelector('.m-tags .tag:last-child');
     const artText = art && art.textContent.includes('арт.') ? ', ' + art.textContent.trim() : '';
-    return t.length > 90 ? t.slice(0, 90) + '…' : t + artText;
+    const price = document.querySelector('.m-price');
+    const priceText = price ? ', ' + price.textContent.trim() : '';
+    const name = t.length > 90 ? t.slice(0, 90) + '…' : t;
+    return name + artText + priceText;
   }
 
   function source() {
@@ -83,6 +86,43 @@
       });
     }
   };
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try { navigator.clipboard.writeText(text); return true; } catch (e) { /* ниже запасной путь */ }
+    }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  let toastEl = null, toastTimer = 0;
+  function toast(text) {
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.className = 'copy-toast';
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = text;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('on'), 6000);
+  }
+
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a');
+    if (!a || !a.href || a.href.indexOf('max.ru/') === -1) return;
+    if (copyText(message())) toast('Текст сообщения скопирован — вставьте его в чат');
+  });
+
   document.addEventListener('click', e => {
     if (!box.contains(e.target) && !list.hidden) {
       list.hidden = true;
