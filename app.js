@@ -47,8 +47,9 @@ function contacts() {
   $('#footContacts').innerHTML =
     `<b>${esc(S.name)}</b>${S.city ? ' · ' + esc(S.city) : ''} · ` +
     `<a href="tel:${esc(S.phoneTel)}">${esc(S.phone)}</a>`;
-  $('#footHours').textContent =
-    [S.hours, S.updated ? 'каталог обновлён ' + S.updated : ''].filter(Boolean).join(' · ');
+  // дату обновления каталога не показываем: прайс обновляется не каждый день,
+  // а старая дата на витрине читается как «наличие неактуально»
+  $('#footHours').textContent = S.hours || '';
 
   // реквизиты продавца — требование закона о защите прав потребителей
   const L = window.LEGAL || {};
